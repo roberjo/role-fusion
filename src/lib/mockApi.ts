@@ -1,8 +1,7 @@
-
 import { getCurrentUser, hasRole } from "./auth";
 
 // Order status types
-export type OrderStatus = 'pending' | 'approved' | 'shipped' | 'closed' | 'reopened';
+export type OrderStatus = 'pending' | 'approved' | 'shipped' | 'closed' | 'reopened' | 'rejected';
 
 // Order item
 export interface OrderItem {
@@ -98,7 +97,7 @@ const generateRandomDate = (daysBack: number = 90) => {
 
 // Generate mock orders
 const generateMockOrders = (count: number): Order[] => {
-  const statuses: OrderStatus[] = ['pending', 'approved', 'shipped', 'closed', 'reopened'];
+  const statuses: OrderStatus[] = ['pending', 'approved', 'shipped', 'closed', 'reopened', 'rejected'];
   
   return Array.from({ length: count }).map((_, index) => {
     const customerId = mockCustomers[Math.floor(Math.random() * mockCustomers.length)].id;
