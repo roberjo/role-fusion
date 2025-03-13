@@ -6,21 +6,32 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Lock, Loader2, User } from "lucide-react";
+import { Lock, Loader2, User, ChevronRight } from "lucide-react";
+import { login, getAvailableUsers } from "@/lib/auth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("password"); // Default password for demo
+  const [selectedDemoUser, setSelectedDemoUser] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const availableUsers = getAvailableUsers();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!email) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please enter an email address",
         variant: "destructive",
       });
       return;
@@ -29,34 +40,24 @@ export function LoginForm() {
     try {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, accept any login
-      localStorage.setItem("auth", JSON.stringify({
-        user: {
-          id: "user-1",
-          name: "John Appleseed",
-          email,
-          role: "admin",
-        },
-        token: "demo-token-xyz",
-      }));
-      
-      toast({
-        title: "Success",
-        description: "You have been logged in successfully",
-      });
-      
+      await login(email, password);
       navigate("/");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: (error as Error).message || "Invalid email or password",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDemoUserSelect = (value: string) => {
+    const selectedUser = availableUsers.find(user => user.id === value);
+    if (selectedUser) {
+      setEmail(selectedUser.email);
+      setSelectedDemoUser(value);
     }
   };
 
@@ -98,6 +99,25 @@ export function LoginForm() {
             />
           </div>
         </div>
+
+        <div className="space-y-2">
+          <Label>Demo User (Quick Select)</Label>
+          <Select value={selectedDemoUser} onValueChange={handleDemoUserSelect}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a demo user" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableUsers.map(user => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.name} ({user.role})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Select a pre-configured user to try different roles
+          </p>
+        </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
@@ -107,13 +127,15 @@ export function LoginForm() {
             Signing in...
           </>
         ) : (
-          "Sign in"
+          <>
+            Sign in
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </>
         )}
       </Button>
-
-      <div className="text-center text-sm">
-        <span className="text-muted-foreground">Demo credentials: </span>
-        <span className="font-medium">admin@example.com / password</span>
+      
+      <div className="text-center text-sm mt-6">
+        <span className="text-muted-foreground">Any password works for the demo users.</span>
       </div>
       
       <div className="relative">
@@ -152,10 +174,11 @@ export function LoginForm() {
             strokeLinecap="round" 
             strokeLinejoin="round"
           >
-            <path d="M14 5c.5.3 1.1.5 1.75.5 2.3 0 4.25-2 4.25-4.5 0 0-2 0-2 2 0 1.1-.9 2-2 2-.5 0-1.5 0-2-1z"></path>
-            <path d="M18 10c0 3-2 4-2 4s4-1 4-4.5S17 .17 12 5c-3 3-4 5-1 13 .5 1.5 0 4-1 6 0 0 4.48-1.3 6.5-5 1.2-2.24 2-4.04 2-5 0-1-.5-2-1-2s-1 .5-1 1 .5 1 .5 2S15 21 9 17c-4-2-5-8-4-12 .8-2.66 2.2-4.5 6-5 3.11-.41 6.3 1.56 7 2v8z"></path>
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" x2="12" y1="19" y2="22"></line>
           </svg>
-          Microsoft
+          Okta
         </Button>
       </div>
     </form>
