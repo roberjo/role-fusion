@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 export interface User {
@@ -136,13 +135,15 @@ export const login = async (email: string, password: string): Promise<AuthState>
 
 // Logout the current user
 export const logout = (): void => {
-  localStorage.removeItem("auth");
-  toast.info("You have been logged out");
+  // Get current user name before logging out
+  const currentUser = getCurrentUser();
+  const userName = currentUser ? currentUser.name : "User";
   
-  // Navigate to login page
-  setTimeout(() => {
-    window.location.href = "/login";
-  }, 500);
+  // Clear auth data
+  localStorage.removeItem("auth");
+  
+  // Notify the user
+  toast.info(`${userName} has been logged out`);
 };
 
 // Get all available users (for demo/testing purposes)

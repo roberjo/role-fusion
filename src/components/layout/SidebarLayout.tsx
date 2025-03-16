@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect, useState } from "react";
 import { 
   Sidebar, 
@@ -14,11 +13,21 @@ import {
   SidebarHeader,
   SidebarFooter
 } from "@/components/ui/sidebar";
-import { LogOut, Home, Grid, Workflow, Users, Settings, FileText } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { LogOut, Home, Grid, Workflow, Users, Settings, FileText, User, ChevronDown } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface SidebarLayoutProps {
   children: ReactNode;
@@ -27,9 +36,14 @@ interface SidebarLayoutProps {
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const location = useLocation();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [pageTransition, setPageTransition] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
 
-  // Simulate page transition effect
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+  }, []);
+
   useEffect(() => {
     setPageTransition(true);
     const timer = setTimeout(() => {
@@ -39,10 +53,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   }, [location.pathname]);
 
   const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -55,7 +67,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             <div className="flex-1">
               <PageTitle pathname={location.pathname} />
             </div>
-            <UserMenu />
+            <UserMenu user={currentUser} onLogout={handleLogout} />
           </header>
           <main className={cn(
             "flex-1 p-6",
@@ -86,18 +98,62 @@ function PageTitle({ pathname }: { pathname: string }) {
   );
 }
 
-function UserMenu() {
-  return (
-    <div className="flex items-center gap-4">
-      <div className="text-right mr-2">
-        <p className="text-sm font-medium leading-none">John Appleseed</p>
-        <p className="text-xs text-muted-foreground">Administrator</p>
+interface UserMenuProps {
+  user: UserType | null;
+  onLogout: () => void;
+}
+
+function UserMenu({ user, onLogout }: UserMenuProps) {
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="text-right mr-2">
+          <p className="text-sm font-medium leading-none">Loading...</p>
+        </div>
+        <Avatar className="h-9 w-9">
+          <AvatarFallback>...</AvatarFallback>
+        </Avatar>
       </div>
-      <Avatar className="h-9 w-9">
-        <AvatarImage src="/placeholder.svg" alt="User" />
-        <AvatarFallback>JA</AvatarFallback>
-      </Avatar>
-    </div>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+          <div className="text-right mr-2">
+            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+          </div>
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+            <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/settings")}>
+          <User className="mr-2 h-4 w-4" />
+          <span>Profile Settings</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => {
+          toast.info("Switched to demo mode");
+          navigate("/login");
+        }}>
+          Switch User
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
