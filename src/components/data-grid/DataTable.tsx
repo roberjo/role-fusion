@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Table, 
@@ -14,7 +13,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Search, 
-  SlidersHorizontal,
   ArrowUpDown,
   MoreHorizontal,
   Loader2
@@ -71,6 +69,15 @@ export function DataTable<T extends { id: string | number }>({
   
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
+  useEffect(() => {
+    if (onSort) {
+      const initialSortColumn = columns.find(col => col.sortable)?.id || null;
+      if (initialSortColumn) {
+        setSortColumn(initialSortColumn);
+      }
+    }
+  }, [columns, onSort]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSearch) {
@@ -102,7 +109,6 @@ export function DataTable<T extends { id: string | number }>({
     }
   };
 
-  // Simple animation when data changes
   const [animateRows, setAnimateRows] = useState(false);
   
   useEffect(() => {
@@ -183,7 +189,8 @@ export function DataTable<T extends { id: string | number }>({
                       key={row.id.toString()}
                       className={cn(
                         animateRows ? "animate-fade-in" : "",
-                        "transition-colors hover:bg-muted/40"
+                        "transition-colors hover:bg-muted/40",
+                        idx % 2 === 0 ? "bg-background" : "bg-muted/20"
                       )}
                       style={{ 
                         animationDelay: `${idx * 30}ms`,
