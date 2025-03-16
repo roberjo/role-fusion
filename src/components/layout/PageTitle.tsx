@@ -6,11 +6,17 @@ interface PageTitleProps {
 }
 
 export function PageTitle({ pathname }: PageTitleProps) {
-  const title = pathname === "/" 
-    ? "Dashboard" 
-    : pathname.split("/").pop()?.split("-").map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(" ") || "Dashboard";
+  // Determine the title based on the pathname
+  const getTitle = (path: string) => {
+    if (path === "/") return "Dashboard";
+    
+    // Convert pathname like "/user-management" to "User Management"
+    return path.split("/").pop()?.split("-").map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(" ") || "Dashboard";
+  };
+
+  const title = getTitle(pathname);
 
   return (
     <div className="flex flex-col">
