@@ -1,69 +1,54 @@
-# Welcome to your Lovable project
+# Role Fusion
 
-## Project info
+A powerful role-based access control (RBAC) management system for modern applications.
 
-**URL**: https://lovable.dev/projects/76e1a48f-ca8d-4a7e-81a4-7482816df984
+## 🚀 Features
 
-## How can I edit this code?
+- Dynamic role management
+- Granular permission control
+- Easy integration with existing authentication systems
+- TypeScript support
+- React hooks for role-based rendering
 
-There are several ways of editing your application.
+## 📦 Installation
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/76e1a48f-ca8d-4a7e-81a4-7482816df984) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm install role-fusion
+# or
+yarn add role-fusion
 ```
 
-**Edit a file directly in GitHub**
+## 🔧 Quick Start
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```typescript
+import { RoleProvider, useRole } from 'role-fusion';
 
-**Use GitHub Codespaces**
+// Initialize provider
+const App = () => (
+  <RoleProvider>
+    <YourApp />
+  </RoleProvider>
+);
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+// Use in components
+const MyProtectedComponent = () => {
+  const { hasPermission } = useRole();
+  
+  if (hasPermission('users.edit')) {
+    return <div>Protected Content</div>;
+  }
+  return null;
+};
+```
 
-## What technologies are used for this project?
+## 📚 Documentation
 
-This project is built with .
+Visit our [documentation](./docs/README.md) for detailed guides and API reference.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🤝 Contributing
 
-## How can I deploy this project?
+We welcome contributions! Please see our [contributing guidelines](./CONTRIBUTING.md) for details.
 
-Simply open [Lovable](https://lovable.dev/projects/76e1a48f-ca8d-4a7e-81a4-7482816df984) and click on Share -> Publish.
+## 📄 License
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+MIT License - see the [LICENSE](LICENSE) file for details
