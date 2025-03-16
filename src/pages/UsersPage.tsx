@@ -3,14 +3,34 @@ import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { getAvailableUsers } from "@/lib/auth";
+import { getAvailableUsers, hasRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const UsersPage = () => {
   const users = getAvailableUsers();
   const { toast } = useToast();
+  const isAdmin = hasRole('admin');
+  
+  // Add an extra layer of security - if a non-admin user somehow navigates to this page,
+  // show an access denied toast and redirect them
+  useEffect(() => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "You do not have permission to view this page.",
+        variant: "destructive",
+      });
+    }
+  }, [isAdmin, toast]);
+  
+  // If not admin, redirect to home page
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
   
   const handleAddUser = () => {
     toast({
