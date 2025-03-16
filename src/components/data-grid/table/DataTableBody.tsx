@@ -52,8 +52,10 @@ export function DataTableBody<T extends { id: string | number }>({
           key={row.id.toString()}
           className={cn(
             animateRows ? "animate-fade-in" : "",
-            "transition-colors hover:bg-muted/40",
-            idx % 2 === 0 ? "bg-background" : "bg-muted/20"
+            "transition-colors",
+            idx % 2 === 0 
+              ? "bg-background" 
+              : "bg-muted/20"
           )}
           style={{
             animationDelay: `${idx * 30}ms`,
