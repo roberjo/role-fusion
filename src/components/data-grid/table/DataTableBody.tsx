@@ -55,7 +55,7 @@ export function DataTableBody<T extends { id: string | number }>({
             "transition-colors",
             idx % 2 === 0 
               ? "bg-background" 
-              : "bg-muted/20"
+              : "bg-muted/40"
           )}
           style={{
             animationDelay: `${idx * 30}ms`,
