@@ -1,12 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { WorkflowCard, WorkflowItem } from "@/components/workflow/WorkflowCard";
-import { fetchWorkflows } from "@/lib/api";
+import { fetchWorkflows, mockWorkflows } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle, Filter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,32 +25,37 @@ const WorkflowsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTab, setCurrentTab] = useState("all");
   const [sort, setSort] = useState("newest");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetchWorkflows();
-        setWorkflows(response.data);
+        setWorkflows(mockWorkflows.data);
       } catch (error) {
         console.error("Error fetching workflows:", error);
+        toast({
+          title: "Error loading workflows",
+          description: "Could not load workflow data. Using mock data instead.",
+          variant: "destructive",
+        });
+        setWorkflows(mockWorkflows.data);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     let filtered = [...workflows];
     
-    // Filter by status tab
     if (currentTab !== "all") {
       filtered = filtered.filter(workflow => workflow.status === currentTab);
     }
     
-    // Filter by search query
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(workflow => 
@@ -59,7 +65,6 @@ const WorkflowsPage = () => {
       );
     }
     
-    // Sort
     filtered.sort((a, b) => {
       if (sort === "newest") {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -96,6 +101,14 @@ const WorkflowsPage = () => {
     e.preventDefault();
   };
 
+  const handleCreateWorkflow = () => {
+    navigate("/workflow-editor");
+    toast({
+      title: "New workflow",
+      description: "Creating a new workflow...",
+    });
+  };
+
   const statusCounts = {
     all: workflows.length,
     pending: workflows.filter(w => w.status === "pending").length,
@@ -114,7 +127,7 @@ const WorkflowsPage = () => {
               Manage and track your business processes
             </p>
           </div>
-          <Button>
+          <Button onClick={handleCreateWorkflow}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Workflow
           </Button>

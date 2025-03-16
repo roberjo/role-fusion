@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import DataGridPage from "./pages/DataGridPage";
 import WorkflowsPage from "./pages/WorkflowsPage";
+import WorkflowEditorPage from "./pages/WorkflowEditorPage";
 import OrdersPage from "./pages/OrdersPage";
 import UsersPage from "./pages/UsersPage";
 import ReportsPage from "./pages/ReportsPage";
@@ -82,6 +83,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <WorkflowsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/workflow-editor" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowEditorPage />
                 </ProtectedRoute>
               } 
             />

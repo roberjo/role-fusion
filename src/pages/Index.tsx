@@ -10,6 +10,7 @@ import { fetchGridData, fetchWorkflows, mockWorkflows, mockTableData } from "@/l
 import { cn } from "@/lib/utils";
 import { getAvailableUsers } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
@@ -20,22 +21,19 @@ const Dashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
         
-        // Get actual users from the auth system
         const users = getAvailableUsers();
-        
-        // Use mock data directly instead of API calls that are failing
         const workflowsData = mockWorkflows.data;
         const tableData = mockTableData.data;
         
         setWorkflows(workflowsData);
         
-        // Calculate stats from the real data
         setStats({
           totalUsers: users.length,
           activeProcesses: workflowsData.filter(w => 
@@ -53,7 +51,6 @@ const Dashboard = () => {
           variant: "destructive",
         });
         
-        // Fallback to mock data if API calls fail
         const users = getAvailableUsers();
         setWorkflows(mockWorkflows.data);
         setStats({
@@ -87,6 +84,10 @@ const Dashboard = () => {
         workflow.id === id ? { ...workflow, status: "rejected" } : workflow
       )
     );
+  };
+
+  const handleCreateWorkflow = () => {
+    navigate("/workflow-editor");
   };
 
   const recentActivities = [
@@ -129,7 +130,7 @@ const Dashboard = () => {
               Welcome back, here's what's happening today.
             </p>
           </div>
-          <Button>
+          <Button onClick={handleCreateWorkflow}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Workflow
           </Button>
