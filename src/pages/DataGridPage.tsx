@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { DataTable, StatusBadge } from "@/components/data-grid/DataTable";
@@ -37,17 +36,15 @@ const DataGridPage = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        // Use the mockApi's fetchOrders function instead of fetchGridData
         const response = await fetchOrders(
           currentPage,
           pageSize,
-          undefined, // status filter - can be added later if needed
+          undefined,
           searchQuery,
           sortBy,
           sortDirection
         );
         
-        // Map the order data to match the structure expected by DataTable
         const mappedData = response.data.map(order => ({
           id: order.id,
           orderNumber: order.orderNumber,
@@ -77,13 +74,13 @@ const DataGridPage = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
   const handleSort = (columnId: string, direction: 'asc' | 'desc') => {
     setSortBy(columnId);
     setSortDirection(direction);
-    setCurrentPage(1); // Reset to first page on sort
+    setCurrentPage(1);
   };
 
   const columns = [
