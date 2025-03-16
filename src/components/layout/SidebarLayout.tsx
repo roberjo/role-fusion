@@ -1,3 +1,4 @@
+
 import { ReactNode, useEffect, useState } from "react";
 import { 
   Sidebar, 
@@ -18,7 +19,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
+import { getCurrentUser, hasRole, logout, User as UserType } from "@/lib/auth";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -163,14 +164,22 @@ interface AppSidebarProps {
 }
 
 function AppSidebar({ currentPath, onLogout }: AppSidebarProps) {
+  const isAdmin = hasRole('admin');
+  
+  // Base menu items that all users can see
   const menuItems = [
     { title: "Dashboard", path: "/", icon: Home },
     { title: "Data Grid", path: "/data-grid", icon: Grid },
     { title: "Workflows", path: "/workflows", icon: Workflow },
-    { title: "Users", path: "/users", icon: Users },
+    // Users menu item is conditionally added below for admins only
     { title: "Reports", path: "/reports", icon: FileText },
     { title: "Settings", path: "/settings", icon: Settings },
   ];
+  
+  // Add Users menu item for admin users only
+  if (isAdmin) {
+    menuItems.splice(3, 0, { title: "Users", path: "/users", icon: Users });
+  }
 
   return (
     <Sidebar className="border-r border-border/50">
