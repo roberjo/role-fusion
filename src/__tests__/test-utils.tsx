@@ -1,0 +1,24 @@
+import { render, RenderOptions } from '@testing-library/react';
+import { RoleProvider } from '../components/RoleProvider';
+
+const AllTheProviders = ({ children }) => {
+  return (
+    <RoleProvider
+      roles={{
+        admin: { permissions: ['*'] },
+        user: { permissions: ['users.view'] }
+      }}
+      initialRole="user"
+    >
+      {children}
+    </RoleProvider>
+  );
+};
+
+const customRender = (
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => render(ui, { wrapper: AllTheProviders, ...options });
+
+export * from '@testing-library/react';
+export { customRender as render };
