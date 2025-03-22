@@ -2,58 +2,64 @@ module.exports = {
   root: true,
   env: {
     browser: true,
-    es2020: true,
+    es2021: true,
     node: true,
-    'cypress/globals': true
   },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
-    'plugin:cypress/recommended'
+    'plugin:import/recommended',
+    'plugin:import/typescript',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./tsconfig.json', './cypress/tsconfig.json'],
-    ecmaFeatures: {
-      jsx: true
-    }
+    project: './tsconfig.json',
   },
-  plugins: [
-    '@typescript-eslint',
-    'react',
-    'react-hooks',
-    'react-refresh',
-    'cypress'
-  ],
+  plugins: ['react', '@typescript-eslint', 'import'],
   settings: {
     react: {
-      version: 'detect'
-    }
+      version: 'detect',
+    },
+    'import/resolver': {
+      typescript: {},
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
   },
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true }
-    ],
-    '@typescript-eslint/no-unused-vars': ['warn'],
+    '@typescript-eslint/explicit-function-return-type': ['error', {
+      allowExpressions: true,
+      allowTypedFunctionExpressions: true,
+    }],
+    '@typescript-eslint/no-unused-vars': ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+    }],
+    'import/order': ['error', {
+      'groups': [
+        'builtin',
+        'external',
+        'internal',
+        ['parent', 'sibling'],
+        'index',
+        'object',
+        'type',
+      ],
+      'newlines-between': 'always',
+      'alphabetize': {
+        order: 'asc',
+        caseInsensitive: true,
+      },
+    }],
+    'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
-    'cypress/no-unnecessary-waiting': 'error',
-    'cypress/assertion-before-screenshot': 'warn',
-    'no-unused-expressions': 'off',
-    '@typescript-eslint/no-unused-expressions': 'off'
   },
-  overrides: [
-    {
-      files: ['cypress/**/*.ts'],
-      rules: {
-        '@typescript-eslint/no-unused-expressions': 'off'
-      }
-    }
-  ]
 }

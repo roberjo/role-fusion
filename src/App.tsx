@@ -1,139 +1,92 @@
+import { Suspense } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { isAuthenticated, hasRole } from "@/lib/auth";
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { routeConfig, notFoundRoute, RouteConfig } from '@/routes/config';
 
-// Pages
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import DataGridPage from "./pages/DataGridPage";
-import WorkflowsPage from "./pages/WorkflowsPage";
-import WorkflowEditorPage from "./pages/WorkflowEditorPage";
-import OrdersPage from "./pages/OrdersPage";
-import UsersPage from "./pages/UsersPage";
-import ReportsPage from "./pages/ReportsPage";
-import SettingsPage from "./pages/SettingsPage";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+// Create Query Client with default config
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const queryClient = new QueryClient();
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Protected route wrapper component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
+  const { isAuthenticated, hasRole } = useAuth();
+
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
-};
-
-// Role protected route wrapper component
-const RoleProtectedRoute = ({ 
-  children, 
-  requiredRole 
-}: { 
-  children: React.ReactNode;
-  requiredRole: string;
-}) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!hasRole(requiredRole)) {
-    // Redirect to dashboard if user doesn't have the required role
+  if (requiredRole && !hasRole(requiredRole)) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
 };
 
+const AppRoutes = () => (
+  <Routes>
+    {/* Map through route config to create routes */}
+    {Object.values(routeConfig).map((route: RouteConfig) => (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          route.isPublic ? (
+            <route.component />
+          ) : (
+            <ProtectedRoute requiredRole={route.requiredRole}>
+              <route.component />
+            </ProtectedRoute>
+          )
+        }
+      />
+    ))}
+    
+    {/* Catch-all route */}
+    <Route
+      path={notFoundRoute.path}
+      element={<notFoundRoute.component />}
+    />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="app-theme-preference">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/data-grid" 
-              element={
-                <ProtectedRoute>
-                  <DataGridPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/workflows" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/workflow-editor" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowEditorPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/orders" 
-              element={
-                <ProtectedRoute>
-                  <OrdersPage />
-                </ProtectedRoute>
-              } 
-            />
-            {/* Admin-only route */}
-            <Route 
-              path="/users" 
-              element={
-                <RoleProtectedRoute requiredRole="admin">
-                  <UsersPage />
-                </RoleProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/reports" 
-              element={
-                <ProtectedRoute>
-                  <ReportsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <SettingsPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <ThemeProvider defaultTheme="light" storageKey="app-theme-preference">
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Suspense fallback={<PageLoader />}>
+                <AppRoutes />
+              </Suspense>
+            </TooltipProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </QueryClientProvider>
 );
 

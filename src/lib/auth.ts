@@ -150,3 +150,44 @@ export const logout = (): void => {
 export const getAvailableUsers = (): User[] => {
   return [...mockUsers];
 };
+
+const AUTH_TOKEN_KEY = 'auth_token';
+
+export const getStoredAccessToken = (): string | null => {
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+};
+
+export const setStoredAccessToken = (token: string): void => {
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+};
+
+export const removeStoredAccessToken = (): void => {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+};
+
+export const refreshAccessToken = async (): Promise<void> => {
+  try {
+    const currentToken = getStoredAccessToken();
+    if (!currentToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh token');
+    }
+
+    const data = await response.json();
+    setStoredAccessToken(data.token);
+  } catch (error) {
+    removeStoredAccessToken();
+    throw error;
+  }
+};
