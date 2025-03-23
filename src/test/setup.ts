@@ -1,10 +1,12 @@
 /// <reference types="vitest" />
 /// <reference types="@testing-library/jest-dom" />
 
-import '@testing-library/jest-dom/vitest';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import matchers from '@testing-library/jest-dom/matchers';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
 
 // Mock the API client
 vi.mock('@/lib/api/client', () => ({
@@ -16,9 +18,6 @@ vi.mock('@/lib/api/client', () => ({
     patch: vi.fn(),
   },
 }));
-
-// Extend Vitest's expect with Jest DOM matchers
-expect.extend(matchers);
 
 // Clean up after each test
 afterEach(() => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { RoleProvider } from '@/components/RoleProvider';
@@ -52,14 +52,19 @@ describe('Role Management', () => {
     expect(screen.queryByTestId('admin-panel')).not.toBeInTheDocument();
 
     // Switch to admin role
-    const roleSwitcher = screen.getByTestId('role-switcher');
-    await user.selectOptions(roleSwitcher, 'admin');
+    await act(async () => {
+      const roleSwitcher = screen.getByTestId('role-switcher');
+      await user.selectOptions(roleSwitcher, 'admin');
+    });
 
     // Admin panel should now be visible
     expect(screen.getByTestId('admin-panel')).toBeInTheDocument();
 
     // Switch back to user role
-    await user.selectOptions(roleSwitcher, 'user');
+    await act(async () => {
+      const roleSwitcher = screen.getByTestId('role-switcher');
+      await user.selectOptions(roleSwitcher, 'user');
+    });
 
     // Admin panel should be hidden again
     expect(screen.queryByTestId('admin-panel')).not.toBeInTheDocument();

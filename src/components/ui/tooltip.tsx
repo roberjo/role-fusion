@@ -1,11 +1,19 @@
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 
 const TooltipProvider = TooltipPrimitive.Provider
 
-const Tooltip = TooltipPrimitive.Root
+const Tooltip = ({ defaultOpen, open, onOpenChange, ...props }: TooltipPrimitive.TooltipProps) => (
+  <TooltipPrimitive.Root 
+    defaultOpen={defaultOpen} 
+    open={open} 
+    onOpenChange={onOpenChange}
+    delayDuration={0}
+    {...props} 
+  />
+)
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 

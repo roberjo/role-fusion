@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '@/test/test-utils';
+import { render, screen, fireEvent, waitFor, within } from '@/test/test-utils';
 import {
   Tooltip,
   TooltipTrigger,
@@ -19,58 +18,67 @@ describe('Tooltip', () => {
       </TooltipProvider>
     );
 
-    expect(screen.getByText('Hover me')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toHaveTextContent('Hover me');
   });
 
   it('shows tooltip content on hover', async () => {
-    const { baseElement } = render(
+    render(
       <TooltipProvider>
-        <Tooltip defaultOpen>
+        <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
           <TooltipContent>Tooltip content</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
 
+    // Trigger hover
+    const trigger = screen.getByRole('button');
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+
+    // Wait for the tooltip content to appear
     await waitFor(() => {
-      const tooltipContent = baseElement.querySelector('[data-testid="tooltip-content"]');
+      const tooltipContent = screen.getByTestId('tooltip-content');
       expect(tooltipContent).toBeInTheDocument();
-      // Get the first text node's content only
-      const textContent = tooltipContent?.childNodes[0]?.textContent;
-      expect(textContent).toBe('Tooltip content');
+      expect(tooltipContent).toHaveTextContent('Tooltip content');
     });
   });
 
   it('hides tooltip content on mouse leave', async () => {
-    const { baseElement } = render(
+    render(
       <TooltipProvider>
-        <Tooltip defaultOpen>
+        <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
           <TooltipContent>Tooltip content</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
 
-    // First verify tooltip is visible
+    const trigger = screen.getByRole('button');
+    
+    // Show tooltip
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+    
+    // Wait for tooltip to appear
     await waitFor(() => {
-      const tooltipContent = baseElement.querySelector('[data-testid="tooltip-content"]');
-      expect(tooltipContent).toBeInTheDocument();
+      expect(screen.getByTestId('tooltip-content')).toBeInTheDocument();
     });
 
-    // Trigger mouse leave and verify it disappears
-    const trigger = screen.getByText('Hover me');
+    // Hide tooltip
     fireEvent.mouseLeave(trigger);
+    fireEvent.blur(trigger);
     
+    // Wait for tooltip to disappear
     await waitFor(() => {
-      const tooltipContent = baseElement.querySelector('[data-testid="tooltip-content"]');
-      expect(tooltipContent).not.toBeInTheDocument();
-    });
+      expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument();
+    }, { timeout: 1000 });
   });
 
   it('applies custom className to tooltip content', async () => {
-    const { baseElement } = render(
+    render(
       <TooltipProvider>
-        <Tooltip defaultOpen>
+        <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
           <TooltipContent className="custom-tooltip">
             Tooltip content
@@ -79,10 +87,14 @@ describe('Tooltip', () => {
       </TooltipProvider>
     );
 
+    const trigger = screen.getByRole('button');
+    fireEvent.mouseEnter(trigger);
+    fireEvent.focus(trigger);
+
     await waitFor(() => {
-      const tooltipContent = baseElement.querySelector('[data-testid="tooltip-content"]');
-      expect(tooltipContent).toBeInTheDocument();
-      expect(tooltipContent).toHaveClass('custom-tooltip');
+      const tooltip = screen.getByTestId('tooltip-content');
+      expect(tooltip).toBeInTheDocument();
+      expect(tooltip).toHaveClass('custom-tooltip');
     });
   });
 }); 

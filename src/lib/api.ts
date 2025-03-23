@@ -1,4 +1,5 @@
-
+import '@testing-library/jest-dom';
+import * as jestDomMatchers from '@testing-library/jest-dom/matchers';
 import { getAuthState } from "./auth";
 
 const API_URL = "https://api.example.com/v1"; // Mock API URL
