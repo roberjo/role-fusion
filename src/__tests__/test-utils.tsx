@@ -1,7 +1,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { RoleProvider } from '../components/RoleProvider';
 
-const AllTheProviders = ({ children }) => {
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <RoleProvider
       roles={{

@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useRole } from '../hooks/useRole';
 import { RoleProvider } from '../components/RoleProvider';
 
-const wrapper = ({ children }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <RoleProvider
     roles={{
       admin: {
@@ -17,6 +17,8 @@ const wrapper = ({ children }) => (
     {children}
   </RoleProvider>
 );
+
+import { describe, it, expect } from 'vitest';
 
 describe('useRole hook', () => {
   it('should return current role permissions', () => {

@@ -21,7 +21,7 @@ interface AuthContextType {
   hasRole: (role: string) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthResponse {
   user: User;
