@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { getStoredAccessToken, refreshAccessToken } from '@/lib/auth';
 
@@ -19,7 +20,7 @@ const createApiClient = (): AxiosInstance => {
 
   // Request interceptor
   client.interceptors.request.use(
-    async (config: AxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
       const token = getStoredAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -38,24 +39,29 @@ const createApiClient = (): AxiosInstance => {
       const originalRequest = error.config;
       
       // Handle 401 Unauthorized errors
-      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-        originalRequest._retry = true;
-        try {
-          await refreshAccessToken();
-          const token = getStoredAccessToken();
-          if (token && originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+      if (error.response?.status === 401 && originalRequest) {
+        // Use a type assertion to add the _retry property
+        const typedRequest = originalRequest as AxiosRequestConfig & { _retry?: boolean };
+        
+        if (!typedRequest._retry) {
+          typedRequest._retry = true;
+          try {
+            await refreshAccessToken();
+            const token = getStoredAccessToken();
+            if (token && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return client(originalRequest);
+          } catch (refreshError) {
+            return Promise.reject(refreshError);
           }
-          return client(originalRequest);
-        } catch (refreshError) {
-          return Promise.reject(refreshError);
         }
       }
 
       // Transform error to consistent format
       const apiError: ApiError = {
-        message: error.response?.data?.message || 'An unexpected error occurred',
-        code: error.response?.data?.code || 'UNKNOWN_ERROR',
+        message: error.response?.data ? (error.response.data as any).message || 'An unexpected error occurred' : 'An unexpected error occurred',
+        code: error.response?.data ? (error.response.data as any).code || 'UNKNOWN_ERROR' : 'UNKNOWN_ERROR',
         status: error.response?.status || 500,
       };
 
