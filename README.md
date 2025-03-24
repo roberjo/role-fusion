@@ -76,10 +76,10 @@ Latest results from 47 tests across 11 files:
 
 | Category | Coverage | Details |
 |----------|----------|---------|
-| Statements | 6.5% (615/9435) | Core functionality coverage |
-| Conditionals | 29.4% (37/126) | Branch logic coverage |
-| Methods | 17.0% (18/106) | Function coverage |
-| Files | 102 files | Across 0 packages |
+| Statements | 6.8% (638/9343) | Core functionality coverage |
+| Conditionals | 29.1% (37/127) | Branch logic coverage |
+| Methods | 16.8% (18/107) | Function coverage |
+| Files | 103 files | Across 0 packages |
 
 #### Package Coverage Status
 - ✅ `__tests__`, `components`, `contexts`: 100%
