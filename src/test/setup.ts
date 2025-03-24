@@ -1,12 +1,35 @@
 /// <reference types="vitest" />
 /// <reference types="@testing-library/jest-dom" />
 
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, vi, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
-// Extend Vitest's expect with jest-dom matchers
+// Extend Vitest's expect with Jest DOM matchers
 expect.extend(matchers);
+
+declare module 'vitest' {
+  interface Assertion<T = any> extends jest.Matchers<void, T>, TestingLibraryMatchers<T, void> {}
+  interface AsymmetricMatchersContaining extends jest.Matchers<void, any>, TestingLibraryMatchers<any, void> {}
+}
+
+// Mock window.matchMedia
+beforeEach(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // Deprecated
+      removeListener: vi.fn(), // Deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+});
 
 // Mock the API client
 vi.mock('@/lib/api/client', () => ({
@@ -22,39 +45,7 @@ vi.mock('@/lib/api/client', () => ({
 // Clean up after each test
 afterEach(() => {
   cleanup();
-  // Reset all mocks after each test
   vi.clearAllMocks();
-});
-
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
-// Create portal root for tooltips and other portal-based components
-import { beforeEach } from 'vitest';
-
-beforeEach(() => {
-  const portalRoot = document.createElement('div');
-  portalRoot.setAttribute('id', 'portal-root');
-  document.body.appendChild(portalRoot);
-});
-
-afterEach(() => {
-  const portalRoot = document.getElementById('portal-root');
-  if (portalRoot) {
-    document.body.removeChild(portalRoot);
-  }
 });
 
 // Mock IntersectionObserver
@@ -81,4 +72,4 @@ Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   configurable: true,
   value: MockResizeObserver,
-}); 
+});

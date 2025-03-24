@@ -1,33 +1,59 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, DefaultOptions } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { API_CONFIG } from './constants';
 
-import { ApiError } from './api/client';
+const env = process.env.NODE_ENV;
 
 const handleError = (error: unknown) => {
-  const apiError = error as ApiError;
-  toast.error(apiError.message || 'An unexpected error occurred');
+  const message = error instanceof Error ? error.message : 'An error occurred';
+  toast.error(message);
 };
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-      refetchOnMount: false,
-    },
-    mutations: {
-      onError: handleError,
-      retry: false,
-    },
+const defaultOptions: DefaultOptions = {
+  queries: {
+    staleTime: API_CONFIG.STALE_TIME[env as keyof typeof API_CONFIG.STALE_TIME],
+    retry: API_CONFIG.RETRY_COUNT[env as keyof typeof API_CONFIG.RETRY_COUNT],
+    refetchOnWindowFocus: env === 'production',
+  },
+  mutations: {
+    onError: handleError,
+  },
+};
+
+export const queryClient = new QueryClient({ defaultOptions });
+
+// Global error handler
+queryClient.setDefaultOptions({
+  queries: {
+    onError: handleError,
   },
 });
 
-// Utility function to invalidate queries by prefix
-export const invalidateQueries = async (prefix: string): Promise<void> => {
-  await queryClient.invalidateQueries({ queryKey: [prefix] });
-};
+export function getQueryData<T>(key: string[]): T | undefined {
+  try {
+    return queryClient.getQueryData<T>(key);
+  } catch (error) {
+    console.error('Error getting query data:', error);
+    return undefined;
+  }
+}
+
+export function setQueryData<T>(key: string[], data: T): void {
+  try {
+    queryClient.setQueryData(key, data);
+  } catch (error) {
+    console.error('Error setting query data:', error);
+    toast.error('Failed to update data');
+  }
+}
+
+export function invalidateQueries(key: string[]): void {
+  try {
+    queryClient.invalidateQueries({ queryKey: key });
+  } catch (error) {
+    console.error('Error invalidating queries:', error);
+  }
+}
 
 // Utility function to prefetch queries
 export const prefetchQuery = async <T>(
@@ -38,14 +64,4 @@ export const prefetchQuery = async <T>(
     queryKey: key,
     queryFn: fetcher,
   });
-};
-
-// Utility function to set query data directly
-export const setQueryData = <T>(key: string[], data: T): void => {
-  queryClient.setQueryData(key, data);
-};
-
-// Utility function to get query data
-export const getQueryData = <T>(key: string[]): T | undefined => {
-  return queryClient.getQueryData<T>(key);
 }; 

@@ -1,16 +1,21 @@
-
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface AuthLayoutProps {
   children: ReactNode;
   title: string;
   description?: string;
+  className?: string;
 }
 
-export function AuthLayout({ children, title, description }: AuthLayoutProps) {
+export function AuthLayout({ children, title, description, className }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div 
+      className={twMerge(clsx("min-h-screen flex flex-col", className))} 
+      data-testid="auth-layout"
+    >
       {/* Top gradient accent */}
       <div className="h-2 bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 w-full" />
       

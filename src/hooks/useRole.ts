@@ -1,12 +1,12 @@
 import { useContext } from 'react';
-import { RoleContext, RoleContextType } from '../contexts/RoleContext';
+import { RoleContext } from '../components/RoleProvider';
 
-export const useRole = (): RoleContextType => {
+export function useRole() {
   const context = useContext(RoleContext);
   
   if (!context) {
     throw new Error('useRole must be used within a RoleProvider');
   }
-
+  
   return context;
-};
+}

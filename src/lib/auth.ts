@@ -1,158 +1,91 @@
 import { toast } from "sonner";
+import { PERMISSIONS } from './constants';
 
-export interface User {
+export type UserRole = 'admin' | 'manager' | 'user';
+// Define Permission type based on the union of all possible permission values
+export type Permission = (typeof PERMISSIONS)[UserRole extends keyof typeof PERMISSIONS ? UserRole : never][number];
+
+// Constants
+const AUTH_TOKEN_KEY = 'auth_token';
+
+// Types
+interface User {
   id: string;
-  name: string;
   email: string;
-  role: 'admin' | 'manager' | 'user';
+  name: string;
+  role: UserRole;
   avatar?: string;
 }
 
-export interface AuthState {
+interface AuthState {
   user: User | null;
   token: string | null;
-  isAuthenticated: boolean;
 }
 
-// Mock user data
-const mockUsers = [
+// State
+let authState: AuthState = {
+  user: null,
+  token: null,
+};
+
+// Mock data - Consider moving to a separate file
+const mockUsers: User[] = [
   {
     id: 'user-1',
-    name: 'Alice Johnson',
-    email: 'alice@example.com',
+    email: 'admin@example.com',
+    name: 'Admin User',
     role: 'admin',
-    avatar: '/placeholder.svg'
+    avatar: 'https://avatar.example.com/admin',
   },
   {
     id: 'user-2',
-    name: 'Bob Smith',
-    email: 'bob@example.com',
-    role: 'manager', 
-    avatar: '/placeholder.svg'
+    email: 'manager@example.com',
+    name: 'Manager User',
+    role: 'manager',
+    avatar: 'https://avatar.example.com/manager',
   },
   {
     id: 'user-3',
-    name: 'Charlie Davis',
-    email: 'charlie@example.com',
+    email: 'user@example.com',
+    name: 'Regular User',
     role: 'user',
-    avatar: '/placeholder.svg'
-  }
-] as User[];
+    avatar: 'https://avatar.example.com/user',
+  },
+];
 
-// Get the current auth state from localStorage
-export const getAuthState = (): AuthState => {
-  try {
-    const authData = localStorage.getItem("auth");
-    if (!authData) {
-      return { user: null, token: null, isAuthenticated: false };
-    }
-    
-    const { user, token } = JSON.parse(authData);
-    return {
-      user,
-      token,
-      isAuthenticated: !!token,
-    };
-  } catch (error) {
-    console.error("Error getting auth state:", error);
-    return { user: null, token: null, isAuthenticated: false };
-  }
-};
-
-// Check if user is authenticated
+// Authentication functions
 export const isAuthenticated = (): boolean => {
-  return getAuthState().isAuthenticated;
+  return !!authState.user && !!authState.token;
 };
 
-// Get the current user
-export const getCurrentUser = (): User | null => {
-  return getAuthState().user;
-};
-
-// Check if user has a specific role
-export const hasRole = (role: string): boolean => {
-  const { user } = getAuthState();
+// Role and permission checks
+export const hasRole = (role: UserRole): boolean => {
+  const user = authState.user;
   if (!user) return false;
   
-  // Admin role has all permissions
-  if (user.role === 'admin') return true;
-  
-  // Manager role has manager and user permissions
-  if (user.role === 'manager' && (role === 'manager' || role === 'user')) return true;
-  
-  // User role only has user permissions
-  if (user.role === 'user' && role === 'user') return true;
-  
-  return user.role === role;
+  switch (user.role) {
+    case 'admin':
+      return true;
+    case 'manager':
+      return role === 'manager' || role === 'user';
+    case 'user':
+      return role === 'user';
+    default:
+      return false;
+  }
 };
 
-// Check if user has permission to perform an action
-export const hasPermission = (permission: string): boolean => {
-  const { user } = getAuthState();
+export const hasPermission = (permission: Permission): boolean => {
+  const user = authState.user;
   if (!user) return false;
   
-  const adminPermissions = ["create", "read", "update", "delete", "approve", "ship", "close", "reopen"];
-  const managerPermissions = ["create", "read", "update", "approve", "ship", "close", "reopen"];
-  const userPermissions = ["create", "read"];
+  const roleKey = user.role.toUpperCase() as Uppercase<UserRole>;
+  const rolePermissions = PERMISSIONS[roleKey];
   
-  if (user.role === "admin") {
-    return adminPermissions.includes(permission);
-  } else if (user.role === "manager") {
-    return managerPermissions.includes(permission);
-  } else if (user.role === "user") {
-    return userPermissions.includes(permission);
-  }
-  
-  return false;
+  return rolePermissions.includes(permission);
 };
 
-// Simulate login with email and password
-export const login = async (email: string, password: string): Promise<AuthState> => {
-  // Simulate API request delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Find user by email (case insensitive)
-  const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-  
-  // In a real app, we would validate the password here
-  // For demo purposes, any password is accepted if the user exists
-  if (!user) {
-    throw new Error('Invalid email or password');
-  }
-  
-  // Generate a fake JWT token
-  const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIke3VzZXIuaWR9IiwibmFtZSI6IiR7dXNlci5uYW1lfSIsInJvbGUiOiIke3VzZXIucm9sZX0iLCJpYXQiOjE1MTYyMzkwMjJ9`;
-  
-  // Store auth data in localStorage
-  const authState = { user, token, isAuthenticated: true };
-  localStorage.setItem('auth', JSON.stringify({ user, token }));
-  
-  // Notify the user
-  toast.success(`Welcome, ${user.name}!`);
-  
-  return authState;
-};
-
-// Logout the current user
-export const logout = (): void => {
-  // Get current user name before logging out
-  const currentUser = getCurrentUser();
-  const userName = currentUser ? currentUser.name : "User";
-  
-  // Clear auth data
-  localStorage.removeItem("auth");
-  
-  // Notify the user
-  toast.info(`${userName} has been logged out`);
-};
-
-// Get all available users (for demo/testing purposes)
-export const getAvailableUsers = (): User[] => {
-  return [...mockUsers];
-};
-
-const AUTH_TOKEN_KEY = 'auth_token';
-
+// Token management
 export const getStoredAccessToken = (): string | null => {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 };
@@ -165,6 +98,41 @@ export const removeStoredAccessToken = (): void => {
   localStorage.removeItem(AUTH_TOKEN_KEY);
 };
 
+// Authentication operations
+export const login = async (email: string): Promise<AuthState> => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+  
+  if (!user) {
+    throw new Error('Invalid credentials');
+  }
+
+  const token = 'mock-jwt-token';
+  authState = {
+    user,
+    token,
+  };
+
+  setStoredAccessToken(token);
+  toast.success(`Welcome, ${user.name}!`);
+  
+  return authState;
+};
+
+export const logout = (): void => {
+  const userName = authState.user?.name ?? "User";
+  
+  authState = {
+    user: null,
+    token: null,
+  };
+  
+  removeStoredAccessToken();
+  toast.info(`${userName} has been logged out`);
+};
+
+// Token refresh
 export const refreshAccessToken = async (): Promise<void> => {
   try {
     const currentToken = getStoredAccessToken();
@@ -190,4 +158,9 @@ export const refreshAccessToken = async (): Promise<void> => {
     removeStoredAccessToken();
     throw error;
   }
+};
+
+// Testing/Demo utilities
+export const getAvailableUsers = (): User[] => {
+  return [...mockUsers];
 };

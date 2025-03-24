@@ -1,5 +1,7 @@
-import { render, screen } from './test-utils';
+import { render, screen } from '@testing-library/react';
 import { useRole } from '../hooks/useRole';
+import { RoleProvider } from '../components/RoleProvider';
+import { describe, it, expect } from 'vitest';
 
 function TestComponent() {
   const { hasPermission } = useRole();
@@ -13,7 +15,17 @@ function TestComponent() {
 
 describe('RoleProvider Integration', () => {
   it('should provide correct permissions to nested components', () => {
-    render(<TestComponent />);
+    render(
+      <RoleProvider
+        roles={{
+          admin: { permissions: ['users.view', 'users.edit', 'admin.access'] },
+          user: { permissions: ['users.view'] }
+        }}
+        initialRole={{ name: "user", permissions: ['users.view'] }}
+      >
+        <TestComponent />
+      </RoleProvider>
+    );
     
     expect(screen.getByText('User can view')).toBeInTheDocument();
     expect(screen.queryByText('User can edit')).not.toBeInTheDocument();

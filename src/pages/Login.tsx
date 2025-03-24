@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -23,6 +22,18 @@ const Login = () => {
       <LoginForm />
     </AuthLayout>
   );
+};
+
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/login");
+    }
+  }, [navigate]);
+  
+  return <>{children}</>;
 };
 
 export default Login;

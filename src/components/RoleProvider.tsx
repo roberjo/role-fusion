@@ -1,34 +1,45 @@
-import { ReactNode, useState } from 'react';
-import { RoleContext } from '../contexts/RoleContext';
+import React, { createContext, ReactNode } from 'react';
 
 interface Role {
+  name: string;
   permissions: string[];
 }
 
-export interface RoleProviderProps {
-  children: ReactNode;
-  roles: Record<string, Role>;
-  initialRole: string;
+interface RoleDefinition {
+  permissions: string[];
 }
 
-export const RoleProvider = ({ children, roles, initialRole }: RoleProviderProps) => {
-  const [currentRole, setCurrentRole] = useState(initialRole);
+interface RoleContextType {
+  role: Role;
+  setRole: (roleName: string) => void;
+  hasPermission: (permission: string) => boolean;
+}
 
-  const hasPermission = (permission: string): boolean => {
-    const role = roles[currentRole];
-    return role?.permissions.includes(permission) ?? false;
+interface RoleProviderProps {
+  children: ReactNode;
+  roles: Record<string, RoleDefinition>;
+  initialRole: Role;
+}
+
+export const RoleContext = createContext<RoleContextType | undefined>(undefined);
+
+export function RoleProvider({ children, roles, initialRole }: RoleProviderProps) {
+  const [role, setRole] = React.useState<Role>(initialRole);
+
+  const hasPermission = (permission: string) => {
+    return role.permissions.includes(permission);
+  };
+
+  const handleSetRole = (roleName: string) => {
+    const newRole = roles[roleName];
+    if (newRole) {
+      setRole({ name: roleName, permissions: newRole.permissions });
+    }
   };
 
   return (
-    <RoleContext.Provider 
-      value={{
-        hasPermission,
-        currentRole,
-        setRole: setCurrentRole,
-        permissions: roles[currentRole]?.permissions || []
-      }}
-    >
+    <RoleContext.Provider value={{ role, setRole: handleSetRole, hasPermission }}>
       {children}
     </RoleContext.Provider>
   );
-};
+}

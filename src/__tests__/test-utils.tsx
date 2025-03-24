@@ -5,10 +5,10 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <RoleProvider
       roles={{
-        admin: { permissions: ['*'] },
+        admin: { permissions: ['users.view', 'users.edit', 'admin.access'] },
         user: { permissions: ['users.view'] }
       }}
-      initialRole="user"
+      initialRole={{ name: "user", permissions: ['users.view'] }}
     >
       {children}
     </RoleProvider>

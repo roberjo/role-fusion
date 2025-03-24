@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -38,6 +37,29 @@ interface OrderActionsCellProps {
   refresh: () => void;
 }
 
+const STATUS_ACTION_MAP: Record<string, { title: string, description: string }> = {
+  'approved': {
+    title: 'Approve Order',
+    description: 'Are you sure you want to approve order ${orderNumber}?'
+  },
+  'shipped': {
+    title: 'Ship Order',
+    description: 'Are you sure you want to mark order ${orderNumber} as shipped?'
+  },
+  'closed': {
+    title: 'Close Order',
+    description: 'Are you sure you want to close order ${orderNumber}?'
+  },
+  'reopened': {
+    title: 'Reopen Order',
+    description: 'Are you sure you want to reopen order ${orderNumber}?'
+  },
+  'delete': {
+    title: 'Delete Order',
+    description: 'Are you sure you want to delete order ${orderNumber}? This action cannot be undone.'
+  }
+};
+
 export function OrderActionsCell({ order, refresh }: OrderActionsCellProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [actionType, setActionType] = useState<OrderStatus | 'delete' | null>(null);
@@ -48,29 +70,6 @@ export function OrderActionsCell({ order, refresh }: OrderActionsCellProps) {
   const canClose = hasPermission('close') && (order.status === 'shipped' || order.status === 'approved');
   const canReopen = hasPermission('reopen') && order.status === 'closed';
   const canDelete = hasRole('admin');
-  
-  const statusActionMap: Record<string, { title: string, description: string }> = {
-    'approved': {
-      title: 'Approve Order',
-      description: `Are you sure you want to approve order ${order.orderNumber}?`
-    },
-    'shipped': {
-      title: 'Ship Order',
-      description: `Are you sure you want to mark order ${order.orderNumber} as shipped?`
-    },
-    'closed': {
-      title: 'Close Order',
-      description: `Are you sure you want to close order ${order.orderNumber}?`
-    },
-    'reopened': {
-      title: 'Reopen Order',
-      description: `Are you sure you want to reopen order ${order.orderNumber}?`
-    },
-    'delete': {
-      title: 'Delete Order',
-      description: `Are you sure you want to delete order ${order.orderNumber}? This action cannot be undone.`
-    }
-  };
   
   const handleAction = async () => {
     if (!actionType) return;
@@ -164,9 +163,9 @@ export function OrderActionsCell({ order, refresh }: OrderActionsCellProps) {
         <Dialog open={!!actionType} onOpenChange={(open) => !open && setActionType(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{statusActionMap[actionType]?.title}</DialogTitle>
+              <DialogTitle>{STATUS_ACTION_MAP[actionType]?.title}</DialogTitle>
               <DialogDescription>
-                {statusActionMap[actionType]?.description}
+                {STATUS_ACTION_MAP[actionType]?.description}
               </DialogDescription>
             </DialogHeader>
             

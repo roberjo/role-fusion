@@ -10,12 +10,12 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { routeConfig, notFoundRoute, RouteConfig } from '@/routes/config';
 
 // Create Query Client with default config
-const queryClient = new QueryClient({
+export const createQueryClient = (env: string) => new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
+      staleTime: env === 'production' ? 5 * 60 * 1000 : 0,
+      retry: env === 'production' ? 1 : 0,
+      refetchOnWindowFocus: env === 'production',
     },
   },
 });
@@ -70,7 +70,7 @@ const AppRoutes = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={createQueryClient('production')}>
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>

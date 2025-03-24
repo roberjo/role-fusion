@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
@@ -32,17 +31,7 @@ const Dashboard = () => {
         const workflowsData = mockWorkflows.data;
         const tableData = mockTableData.data;
         
-        setWorkflows(workflowsData);
-        
-        setStats({
-          totalUsers: users.length,
-          activeProcesses: workflowsData.filter(w => 
-            w.status === "pending" || w.status === "review"
-          ).length,
-          completedProcesses: workflowsData.filter(w => 
-            w.status === "approved" || w.status === "rejected"
-          ).length,
-        });
+        setDashboardData(users, workflowsData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         toast({
@@ -52,16 +41,7 @@ const Dashboard = () => {
         });
         
         const users = getAvailableUsers();
-        setWorkflows(mockWorkflows.data);
-        setStats({
-          totalUsers: users.length,
-          activeProcesses: mockWorkflows.data.filter(w => 
-            w.status === "pending" || w.status === "review"
-          ).length,
-          completedProcesses: mockWorkflows.data.filter(w => 
-            w.status === "approved" || w.status === "rejected"
-          ).length,
-        });
+        setDashboardData(users, mockWorkflows.data);
       } finally {
         setIsLoading(false);
       }
@@ -69,6 +49,19 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [toast]);
+
+  const setDashboardData = (users: User[], workflowsData: Workflow[]) => {
+    setWorkflows(workflowsData);
+    setStats({
+      totalUsers: users.length,
+      activeProcesses: workflowsData.filter(w => 
+        w.status === "pending" || w.status === "review"
+      ).length,
+      completedProcesses: workflowsData.filter(w => 
+        w.status === "approved" || w.status === "rejected"
+      ).length,
+    });
+  };
 
   const handleWorkflowApprove = (id: string) => {
     setWorkflows(prev => 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent, waitFor, within } from '@/test/test-utils';
+import { render, screen, fireEvent, waitFor, within } from '../../../test/test-utils';
 import {
   Tooltip,
   TooltipTrigger,
@@ -94,7 +94,7 @@ describe('Tooltip', () => {
     await waitFor(() => {
       const tooltip = screen.getByTestId('tooltip-content');
       expect(tooltip).toBeInTheDocument();
-      expect(tooltip).toHaveClass('custom-tooltip');
+      expect(tooltip.className.split(' ')).toContain('custom-tooltip');
     });
   });
 }); 

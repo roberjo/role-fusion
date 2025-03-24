@@ -2,6 +2,42 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { resolve } from 'path';
+import fs from 'fs/promises';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { readFileSync, writeFileSync } from 'fs';
+
+// Function to update README with coverage stats
+function processCoverageResults() {
+  try {
+    const coverageData = JSON.parse(readFileSync('coverage/coverage-summary.json', 'utf-8'));
+    const stats = {
+      statements: coverageData.total.statements.pct,
+      branches: coverageData.total.branches.pct,
+      functions: coverageData.total.functions.pct,
+      lines: coverageData.total.lines.pct,
+    };
+
+    const readmeContent = readFileSync('README.md', 'utf-8');
+    const coverageSection = `## Coverage
+
+| Category    | Coverage |
+|------------|----------|
+| Statements | ${stats.statements}%     |
+| Branches   | ${stats.branches}%     |
+| Functions  | ${stats.functions}%     |
+| Lines      | ${stats.lines}%     |`;
+
+    const newContent = readmeContent.replace(
+      /## Coverage[\s\S]*?(?=##|$)/,
+      `${coverageSection}\n\n`
+    );
+
+    writeFileSync('README.md', newContent, 'utf-8');
+  } catch (error) {
+    console.error('Failed to update README with coverage stats:', error);
+  }
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -34,10 +70,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' &&
     componentTagger(),
+    tsconfigPaths(),
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": resolve(__dirname, "./src"),
     },
   },
   build: {
@@ -54,5 +91,22 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      exclude: [
+        'node_modules/**',
+        'src/test/**',
+      ],
+    },
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+    onFinished: processCoverageResults,
   },
 }));

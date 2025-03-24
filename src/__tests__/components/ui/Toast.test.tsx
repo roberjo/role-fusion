@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '@/test/test-utils';
-import { Toast, ToastAction, ToastClose, ToastProvider, ToastTitle, ToastDescription, ToastViewport } from '@/components/ui/toast';
+import { render } from '../../../test/test-utils';
+import { Toast, ToastAction, ToastClose, ToastProvider, ToastTitle, ToastDescription, ToastViewport } from '../../../components/ui/toast';
 
 describe('Toast', () => {
   it('renders with title and description', async () => {
@@ -80,8 +80,10 @@ describe('Toast', () => {
     );
 
     await waitFor(() => {
-      const toast = screen.getByRole('status');
-      expect(toast.className).toContain('destructive');
+      const toast = screen.getByTestId('toast');
+      const classes = toast.className.split(' ');
+      expect(classes).toContain('destructive');
+      expect(classes).toContain('group');
     });
   });
 
@@ -98,8 +100,10 @@ describe('Toast', () => {
     );
 
     await waitFor(() => {
-      const toast = screen.getByRole('status');
-      expect(toast.className).toContain('custom-toast');
+      const toast = screen.getByTestId('toast');
+      const classes = toast.className.split(' ');
+      expect(classes).toContain('custom-toast');
+      expect(classes).toContain('group');
     });
   });
 }); 
