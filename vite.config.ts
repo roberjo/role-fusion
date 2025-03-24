@@ -65,6 +65,7 @@ export default defineConfig(({ mode }) => ({
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
     },
+    allowedHosts: ['.lovableproject.com', '.lovable.com', '.loveable.com', 'localhost'],
     headers: {
       'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
