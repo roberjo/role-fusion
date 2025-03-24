@@ -10,8 +10,8 @@
 
 A modern, powerful role-based access control (RBAC) management system built with React, TypeScript, and Tailwind CSS.
 
-[Getting Started](#-getting-started) •
 [Features](#-features) •
+[Quick Start](#-quick-start) •
 [Documentation](#-documentation) •
 [Contributing](#-contributing)
 
@@ -32,48 +32,24 @@ A modern, powerful role-based access control (RBAC) management system built with
 - 🎨 **Theme Support** - Light/dark mode with customizable colors
 - 🔒 **Security Focus** - Regular security audits and dependency updates
 
-## 📊 Test Coverage
-
-Latest test results show:
-- ✅ 47 tests passing across 11 test files
-- 🎯 Key components with 100% coverage:
-  - `RoleProvider`
-  - `AdminPanel`
-  - `TestComponent`
-  - Core UI components (Button, Toast, Tooltip)
-- 🔍 Role management features thoroughly tested:
-  - Role switching functionality
-  - Permission checking
-  - Component rendering based on roles
-  - Context provider integration
-
-## 🛠️ Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js (v18 or higher)
 - npm or yarn
 
-### Clone the Repository
-
+### Installation
 ```bash
+# Clone the repository
 git clone https://github.com/yourusername/role-fusion.git
 cd role-fusion
-```
 
-### Install Dependencies
-
-```bash
+# Install dependencies
 npm install
 # or
 yarn install
-```
 
-### Development
-
-Run the development server:
-
-```bash
+# Start development server
 npm run dev
 # or
 yarn dev
@@ -81,28 +57,22 @@ yarn dev
 
 The application will be available at `http://localhost:5173`
 
-### Testing
+## 🏗️ Tech Stack
 
-Run the test suite:
+- **Core:** React 18, TypeScript, Vite
+- **UI:** Tailwind CSS, Radix UI
+- **State:** React Query
+- **Forms:** React Hook Form
+- **Testing:** Vitest
+- **Quality:** ESLint, Prettier
+- **CI/CD:** GitHub Actions
+- **Performance:** Lighthouse CI
+- **Security:** Automated scans, Dependabot
 
-```bash
-# Run tests
-npm run test
-# or
-yarn test
+## 📊 Quality & Testing
 
-# Run tests with UI
-npm run test:ui
-# or
-yarn test:ui
-
-# Run tests with coverage
-npm run coverage
-# or
-yarn coverage
-```
-
-#### Current Test Coverage
+### Test Coverage
+Latest results from 47 tests across 11 files:
 
 | Category | Coverage | Details |
 |----------|----------|---------|
@@ -111,39 +81,38 @@ yarn coverage
 | Methods | 17.0% (18/106) | Function coverage |
 | Files | 102 files | Across 0 packages |
 
-##### Coverage by Package
+#### Package Coverage Status
+- ✅ `__tests__`, `components`, `contexts`: 100%
+- 🟨 `hooks`: 31.6%
+- ❌ `components/auth`, `layout`, `theme`, `ui`, `lib`: Needs coverage
 
-- ✅ `__tests__`: 100% (8/8 statements)
-- ✅ `components`: 100% (8/8 statements)
-- ✅ `contexts`: 100% (2/2 statements)
-- 🟨 `hooks`: 31.6% (6/19 statements)
-- ❌ `components/auth`: 0% (0/3 statements)
-- ❌ `components/layout`: 0% (0/7 statements)
-- ❌ `components/theme`: 0% (0/26 statements)
-- ❌ `components/ui`: 0% (0/14 statements)
-- ❌ `lib`: 0% (0/187 statements)
-
-##### Coverage Gaps
-
-Key areas needing test coverage:
-- Authentication flows in `lib/auth.ts`
-- API interactions in `lib/api.ts`
-- Theme management in `components/theme`
+#### Areas for Improvement
+- Authentication flows (`lib/auth.ts`)
+- API interactions (`lib/api.ts`)
+- Theme management (`components/theme`)
 - UI component functionality
 - Mobile responsiveness hooks
 
-### Build
+### Code Quality Standards
 
-Create a production build:
+#### Static Analysis
+- ✅ **TypeScript**: Strict type checking
+- 🔍 **ESLint**: TypeScript, React Hooks, and best practices
+- 📝 **Prettier**: Consistent code formatting
+- 🎨 **Component Structure**: Standardized organization
 
-```bash
-npm run build
-# or
-yarn build
-```
+#### Continuous Quality Checks
+Every PR triggers:
+- Type checking
+- Linting & formatting
+- Test coverage analysis
+- Bundle size monitoring
+- Performance benchmarking
+- Security audits
 
-## 🧰 Available Scripts
+## 🛠️ Development
 
+### Available Scripts
 - `dev` - Start development server
 - `build` - Create production build
 - `preview` - Preview production build
@@ -154,48 +123,36 @@ yarn build
 - `lint` - Lint and fix code
 - `lint:check` - Check code for linting issues
 
-## 🏗️ Tech Stack
-
-- **Framework:** React 18
-- **Build Tool:** Vite
-- **Styling:** Tailwind CSS
-- **UI Components:** Radix UI
-- **State Management:** React Query
-- **Form Handling:** React Hook Form
-- **Testing:** Vitest
-- **Type Checking:** TypeScript
-- **Code Quality:** ESLint
-- **CI/CD:** GitHub Actions
-- **Performance:** Lighthouse CI
-- **Security:** Automated security scans
-- **Dependencies:** Dependabot
+### Build
+```bash
+npm run build
+# or
+yarn build
+```
 
 ## 📚 Documentation
 
-For detailed documentation, please visit:
-
+Comprehensive guides available:
 - [API Reference](./docs/README.md)
 - [Component Guide](./docs/components.md)
-- [Contributing Guidelines](./CONTRIBUTING.md)
 - [Hooks Documentation](./docs/hooks.md)
 - [Troubleshooting Guide](./docs/troubleshooting.md)
+- [Contributing Guidelines](./CONTRIBUTING.md)
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details on how to:
+We welcome contributions! See our [Contributing Guidelines](./CONTRIBUTING.md) for:
+1. Fork and clone process
+2. Development setup
+3. Pull request guidelines
+4. Code style requirements
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to your branch
-5. Open a Pull Request
-
-Our CI pipeline will automatically:
-- Run tests
-- Check code quality
-- Analyze bundle size
-- Run security scans
-- Generate preview deployments
+Our CI pipeline automatically:
+- Runs all tests
+- Checks code quality
+- Analyzes bundle size
+- Runs security scans
+- Generates preview deployments
 
 ## 📄 License
 
