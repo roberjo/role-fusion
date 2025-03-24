@@ -4,7 +4,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { isAuthenticated } from "@/lib/auth";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+export function Login() {
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -22,9 +22,9 @@ const Login = () => {
       <LoginForm />
     </AuthLayout>
   );
-};
+}
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+export function PrivateRoute({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -34,6 +34,4 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   }, [navigate]);
   
   return <>{children}</>;
-};
-
-export default Login;
+}

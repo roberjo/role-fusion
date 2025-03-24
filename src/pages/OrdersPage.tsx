@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { DataTable } from "@/components/data-grid/DataTable";
@@ -22,7 +21,7 @@ import {
 import { OrderActionsCell } from "@/components/orders/OrderActionsCell";
 import { useNavigate } from "react-router-dom";
 
-const OrdersPage = () => {
+export function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,29 +130,7 @@ const OrdersPage = () => {
       header: "Actions",
       accessorKey: "id" as keyof Order,
       sortable: false,
-      cell: (item: Order) => <OrderActionsCell order={item} refresh={() => {
-        // Refresh the orders list after an action
-        const loadOrders = async () => {
-          try {
-            setIsLoading(true);
-            const response = await fetchOrders(
-              currentPage,
-              pageSize,
-              currentTab === 'all' ? undefined : currentTab,
-              searchQuery,
-              sortBy,
-              sortDirection
-            );
-            
-            setOrders(response.data);
-            setTotalItems(response.meta.totalItems);
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        
-        loadOrders();
-      }} />,
+      cell: (item: Order) => <OrderActionsCell row={{ original: item }} />,
     }
   ];
 
@@ -250,16 +227,11 @@ const OrdersPage = () => {
               totalItems={totalItems}
               pageSize={pageSize}
               onPageChange={handlePageChange}
-              onSearch={handleSearch}
               onSort={handleSort}
-              title="Order Management"
-              description="View and manage customer orders"
             />
           )}
         </div>
       </div>
     </SidebarLayout>
   );
-};
-
-export default OrdersPage;
+}

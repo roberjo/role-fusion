@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentUser } from "@/lib/auth";
 
-const SettingsPage = () => {
+export function SettingsPage() {
   const { toast } = useToast();
   const currentUser = getCurrentUser();
   
@@ -183,6 +182,4 @@ const SettingsPage = () => {
       </Tabs>
     </SidebarLayout>
   );
-};
-
-export default SettingsPage;
+}

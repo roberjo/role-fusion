@@ -1,7 +1,7 @@
 import { getCurrentUser, hasRole } from "./auth";
 
 // Order status types
-export type OrderStatus = 'pending' | 'approved' | 'shipped' | 'closed' | 'reopened' | 'rejected';
+export type OrderStatus = 'PENDING' | 'APPROVED' | 'SHIPPED' | 'CLOSED' | 'REOPENED' | 'REJECTED';
 
 // Order item
 export interface OrderItem {
@@ -97,7 +97,7 @@ const generateRandomDate = (daysBack: number = 90) => {
 
 // Generate mock orders
 const generateMockOrders = (count: number): Order[] => {
-  const statuses: OrderStatus[] = ['pending', 'approved', 'shipped', 'closed', 'reopened', 'rejected'];
+  const statuses: OrderStatus[] = ['PENDING', 'APPROVED', 'SHIPPED', 'CLOSED', 'REOPENED', 'REJECTED'];
   
   return Array.from({ length: count }).map((_, index) => {
     const customerId = mockCustomers[Math.floor(Math.random() * mockCustomers.length)].id;
@@ -124,7 +124,7 @@ const generateMockOrders = (count: number): Order[] => {
         {
           id: `history-${Date.now()}-${index}`,
           orderId: `order-${index + 1}`,
-          status: 'pending',
+          status: 'PENDING',
           timestamp: createdAt,
           performedBy: 'user-1',
           notes: 'Order created'
@@ -224,7 +224,7 @@ export const createOrder = async (orderData: Partial<Order>): Promise<Order> => 
     orderNumber: `ORD-${new Date().getFullYear()}-${10000 + mockOrders.length + 1}`,
     customerId: orderData.customerId || mockCustomers[0].id,
     customerName: orderData.customerName || mockCustomers[0].name,
-    status: 'pending',
+    status: 'PENDING',
     items: orderData.items || [],
     totalAmount: orderData.items ? 
       orderData.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) : 0,
@@ -236,7 +236,7 @@ export const createOrder = async (orderData: Partial<Order>): Promise<Order> => 
       {
         id: `history-${Date.now()}`,
         orderId: `order-${Date.now()}`,
-        status: 'pending',
+        status: 'PENDING',
         timestamp,
         performedBy: user.id,
         notes: 'Order created'
@@ -248,31 +248,35 @@ export const createOrder = async (orderData: Partial<Order>): Promise<Order> => 
   return newOrder;
 };
 
-// Update an order's status (approval, shipping, closing, reopening)
-export const updateOrderStatus = async (
-  orderId: string, 
-  newStatus: OrderStatus, 
-  notes?: string
-): Promise<Order> => {
-  await delay(600);
+// Update order status
+export const updateOrderStatus = async (orderId: string, newStatus: OrderStatus): Promise<Order> => {
+  await delay(500);
   
   const user = getCurrentUser();
   if (!user) {
     throw new Error('User must be authenticated to update orders');
   }
   
-  // For status changes that require manager role
-  if (
-    (newStatus === 'approved' || newStatus === 'rejected') && 
-    !hasRole('manager') && 
-    !hasRole('admin')
-  ) {
-    throw new Error('Only managers or admins can approve or reject orders');
-  }
-  
   const orderIndex = mockOrders.findIndex(order => order.id === orderId);
   if (orderIndex === -1) {
     throw new Error('Order not found');
+  }
+  
+  // For status changes that require manager role
+  if (
+    (newStatus === 'APPROVED' || newStatus === 'REJECTED') && 
+    !hasRole('MANAGER') && 
+    !hasRole('ADMIN')
+  ) {
+    throw new Error('Insufficient permissions to approve or reject orders');
+  }
+  
+  // For status changes that require admin role
+  if (
+    (newStatus === 'CLOSED' || newStatus === 'REOPENED') && 
+    !hasRole('ADMIN')
+  ) {
+    throw new Error('Insufficient permissions to close or reopen orders');
   }
   
   const timestamp = new Date().toISOString();
@@ -288,7 +292,7 @@ export const updateOrderStatus = async (
         status: newStatus,
         timestamp,
         performedBy: user.id,
-        notes: notes || `Order ${newStatus}`
+        notes: `Status updated to ${newStatus}`
       }
     ]
   };
@@ -297,16 +301,24 @@ export const updateOrderStatus = async (
   return updatedOrder;
 };
 
-// Delete an order (only admins can do this)
-export const deleteOrder = async (orderId: string): Promise<boolean> => {
-  await delay(700);
+// Delete an order
+export const deleteOrder = async (orderId: string): Promise<void> => {
+  await delay(500);
   
-  if (!hasRole('admin')) {
-    throw new Error('Only admins can delete orders');
+  const user = getCurrentUser();
+  if (!user) {
+    throw new Error('User must be authenticated to delete orders');
   }
   
-  const initialLength = mockOrders.length;
-  mockOrders = mockOrders.filter(order => order.id !== orderId);
+  // Only admins can delete orders
+  if (!hasRole('ADMIN')) {
+    throw new Error('Only administrators can delete orders');
+  }
   
-  return mockOrders.length < initialLength;
+  const orderIndex = mockOrders.findIndex(order => order.id === orderId);
+  if (orderIndex === -1) {
+    throw new Error('Order not found');
+  }
+  
+  mockOrders = mockOrders.filter(order => order.id !== orderId);
 };

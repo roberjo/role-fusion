@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import { WorkflowCard, WorkflowItem } from "@/components/workflow/WorkflowCard";
-import { fetchWorkflows, mockWorkflows } from "@/lib/api";
+import { mockWorkflows } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, PlusCircle, Filter } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const WorkflowsPage = () => {
+export function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
   const [filteredWorkflows, setFilteredWorkflows] = useState<WorkflowItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -229,6 +229,4 @@ const WorkflowsPage = () => {
       </div>
     </SidebarLayout>
   );
-};
-
-export default WorkflowsPage;
+}

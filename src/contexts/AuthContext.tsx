@@ -1,72 +1,61 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { api } from '@/lib/api/client';
-import { ROUTES } from '@/routes/config';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  roles: string[];
-}
+import { toast } from 'sonner';
+import {
+  User,
+  AuthState,
+  LoginCredentials,
+  login as authLogin,
+  logout as authLogout,
+  refreshAccessToken,
+  hasRole as checkRole,
+  hasPermission as checkPermission,
+  isAuthenticated as checkAuth,
+  getAuthState,
+} from '@/lib/auth';
+import type { Permission } from '@/lib/constants';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   isAuthenticated: () => boolean;
-  hasRole: (role: string) => boolean;
+  hasRole: (role: User['role']) => boolean;
+  hasPermission: (permission: Permission) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-interface AuthResponse {
-  user: User;
-  token: string;
-}
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>(getAuthState());
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Initialize auth state from localStorage
+  // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          const user = await api.get<User>('/api/auth/me');
-          setUser(user);
-        }
+        await refreshAccessToken();
+        setAuthState(getAuthState());
       } catch (error) {
         console.error('Failed to initialize auth:', error);
-        localStorage.removeItem('auth_token');
-      } finally {
-        setIsLoading(false);
       }
     };
 
     initializeAuth();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.post<AuthResponse>('/api/auth/login', {
-        email,
-        password,
-      });
-
-      localStorage.setItem('auth_token', response.token);
-      setUser(response.user);
-      navigate(ROUTES.HOME);
+      await authLogin(credentials);
+      setAuthState(getAuthState());
+      navigate('/');
     } catch (error) {
       setError('Invalid email or password');
       throw error;
@@ -76,27 +65,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [navigate]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('auth_token');
-    setUser(null);
-    navigate(ROUTES.LOGIN);
+    try {
+      authLogout();
+      setAuthState(getAuthState());
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to log out properly');
+    }
   }, [navigate]);
 
   const isAuthenticated = useCallback(() => {
-    return !!user;
-  }, [user]);
+    return checkAuth();
+  }, []);
 
-  const hasRole = useCallback((role: string) => {
-    return user?.roles.includes(role) ?? false;
-  }, [user]);
+  const hasRole = useCallback((role: User['role']) => {
+    return checkRole(role);
+  }, []);
+
+  const hasPermission = useCallback((permission: Permission) => {
+    return checkPermission(permission);
+  }, []);
 
   const value = {
-    user,
+    user: authState.user,
     isLoading,
     error,
     login,
     logout,
     isAuthenticated,
     hasRole,
+    hasPermission,
   };
 
   return (

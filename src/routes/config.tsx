@@ -5,8 +5,13 @@ import { NotFound } from '@/pages/NotFound';
 import { OrdersPage } from '@/pages/OrdersPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { WorkflowsPage } from '@/pages/WorkflowsPage';
+import { ReactNode } from 'react';
 
-export const routes: RouteObject[] = [
+interface AppRouteObject extends RouteObject {
+  element: ReactNode;
+}
+
+export const routes: AppRouteObject[] = [
   {
     path: '/',
     element: <Dashboard />,

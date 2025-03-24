@@ -1,10 +1,9 @@
-
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const NotFound = () => {
+export function NotFound() {
   const location = useLocation();
 
   useEffect(() => {
@@ -39,6 +38,4 @@ const NotFound = () => {
       </div>
     </div>
   );
-};
-
-export default NotFound;
+}

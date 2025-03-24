@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { getAvailableUsers } from "@/lib/auth";
+import { getAvailableUsers, User } from "@/lib/auth";
 import { fetchWorkflows, mockWorkflows, mockTableData } from "@/lib/api";
 import { WorkflowItem } from "@/components/workflow/WorkflowCard";
 import { StatsCards } from "./components/StatsCards";
 import { PendingWorkflows } from "./components/PendingWorkflows";
 import { RecentActivities } from "./components/RecentActivities";
 
-const Dashboard = () => {
+export function Dashboard() {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -50,7 +50,7 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [toast]);
 
-  const setDashboardData = (users: User[], workflowsData: Workflow[]) => {
+  const setDashboardData = (users: User[], workflowsData: WorkflowItem[]) => {
     setWorkflows(workflowsData);
     setStats({
       totalUsers: users.length,
@@ -113,6 +113,4 @@ const Dashboard = () => {
       </div>
     </SidebarLayout>
   );
-};
-
-export default Dashboard;
+}

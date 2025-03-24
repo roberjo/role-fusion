@@ -5,19 +5,42 @@ export const DESKTOP_BREAKPOINT = 1280;
 export const THEME_STORAGE_KEY = 'role-fusion-theme';
 export const DEFAULT_THEME = 'system';
 
+// Define all possible permissions
+export const ALL_PERMISSIONS = [
+  "create",
+  "read",
+  "update",
+  "delete",
+  "approve",
+  "ship",
+  "close",
+  "reopen",
+  "manage_users",
+  "manage_roles",
+  "manage_settings",
+] as const;
+
+export type Permission = typeof ALL_PERMISSIONS[number];
+
 export const PERMISSIONS = {
-  ADMIN: ["create", "read", "update", "delete", "approve", "ship", "close", "reopen"],
-  MANAGER: ["create", "read", "update", "approve", "ship", "close", "reopen"],
-  USER: ["create", "read"],
+  ADMIN: ALL_PERMISSIONS,
+  MANAGER: [
+    "create", "read", "update",
+    "approve", "ship", "close", "reopen",
+    "manage_settings",
+  ],
+  USER: ["read", "create"],
 } as const;
 
 export const STATUS_COLORS = {
-  active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
-  pending: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100",
-  inactive: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100",
-  approved: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
-  rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
-  review: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100",
+  ACTIVE: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
+  PENDING: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100",
+  INACTIVE: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100",
+  APPROVED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
+  REJECTED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
+  SHIPPED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100",
+  CLOSED: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100",
+  REOPENED: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100",
 } as const;
 
 export const TOAST_VARIANTS = {

@@ -1,20 +1,20 @@
 import { Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-import { Toaster as Sonner, Toaster } from '@/components/ui/sonner';
+import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { routeConfig, notFoundRoute, RouteConfig } from '@/routes/config';
+import { routes } from '@/routes/config';
+import { API_CONFIG } from '@/lib/constants';
 
 // Create Query Client with default config
 export const createQueryClient = (env: string) => new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: env === 'production' ? 5 * 60 * 1000 : 0,
-      retry: env === 'production' ? 1 : 0,
+      staleTime: API_CONFIG.STALE_TIME[env as keyof typeof API_CONFIG.STALE_TIME],
+      retry: API_CONFIG.RETRY_COUNT[env as keyof typeof API_CONFIG.RETRY_COUNT],
       refetchOnWindowFocus: env === 'production',
     },
   },
@@ -28,15 +28,11 @@ const PageLoader = () => (
 );
 
 // Protected route wrapper component
-const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
-  const { isAuthenticated, hasRole } = useAuth();
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
-  }
-
-  if (requiredRole && !hasRole(requiredRole)) {
-    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -44,40 +40,32 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
 
 const AppRoutes = () => (
   <Routes>
-    {/* Map through route config to create routes */}
-    {Object.values(routeConfig).map((route: RouteConfig) => (
+    {/* Public route */}
+    <Route path="/login" element={routes.find(r => r.path === '/login')?.element} />
+    
+    {/* Protected routes */}
+    {routes.filter(route => route.path !== '/login').map((route) => (
       <Route
         key={route.path}
         path={route.path}
         element={
-          route.isPublic ? (
-            <route.component />
-          ) : (
-            <ProtectedRoute requiredRole={route.requiredRole}>
-              <route.component />
-            </ProtectedRoute>
-          )
+          <ProtectedRoute>
+            {route.element}
+          </ProtectedRoute>
         }
       />
     ))}
-    
-    {/* Catch-all route */}
-    <Route
-      path={notFoundRoute.path}
-      element={<notFoundRoute.component />}
-    />
   </Routes>
 );
 
 const App = () => (
-  <QueryClientProvider client={createQueryClient('production')}>
+  <QueryClientProvider client={createQueryClient(process.env.NODE_ENV || 'development')}>
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <ThemeProvider defaultTheme="light" storageKey="app-theme-preference">
+          <ThemeProvider defaultTheme="system" storageKey="role-fusion-theme">
             <TooltipProvider>
               <Toaster />
-              <Sonner />
               <Suspense fallback={<PageLoader />}>
                 <AppRoutes />
               </Suspense>

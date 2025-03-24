@@ -1,89 +1,121 @@
 import { toast } from "sonner";
 import { PERMISSIONS } from './constants';
-
-export type UserRole = 'admin' | 'manager' | 'user';
-// Define Permission type based on the union of all possible permission values
-export type Permission = (typeof PERMISSIONS)[UserRole extends keyof typeof PERMISSIONS ? UserRole : never][number];
+import type { Permission } from './constants';
 
 // Constants
 const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_STATE_KEY = 'auth_state';
 
 // Types
-interface User {
+export interface User {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
+  role: keyof typeof PERMISSIONS;
   avatar?: string;
 }
 
-interface AuthState {
+export interface AuthState {
+  isAuthenticated: boolean;
   user: User | null;
-  token: string | null;
 }
 
-// State
-let authState: AuthState = {
-  user: null,
-  token: null,
-};
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
-// Mock data - Consider moving to a separate file
-const mockUsers: User[] = [
-  {
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
+
+// Mock data - moved to a separate constant
+const MOCK_USERS: Record<string, User & { password: string }> = {
+  'admin@example.com': {
     id: 'user-1',
     email: 'admin@example.com',
+    password: 'admin123', // In a real app, this would be hashed
     name: 'Admin User',
-    role: 'admin',
+    role: 'ADMIN',
     avatar: 'https://avatar.example.com/admin',
   },
-  {
+  'manager@example.com': {
     id: 'user-2',
     email: 'manager@example.com',
+    password: 'manager123',
     name: 'Manager User',
-    role: 'manager',
+    role: 'MANAGER',
     avatar: 'https://avatar.example.com/manager',
   },
-  {
+  'user@example.com': {
     id: 'user-3',
     email: 'user@example.com',
+    password: 'user123',
     name: 'Regular User',
-    role: 'user',
+    role: 'USER',
     avatar: 'https://avatar.example.com/user',
   },
-];
-
-// Authentication functions
-export const isAuthenticated = (): boolean => {
-  return !!authState.user && !!authState.token;
 };
 
-// Role and permission checks
-export const hasRole = (role: UserRole): boolean => {
-  const user = authState.user;
-  if (!user) return false;
-  
-  switch (user.role) {
-    case 'admin':
-      return true;
-    case 'manager':
-      return role === 'manager' || role === 'user';
-    case 'user':
-      return role === 'user';
-    default:
-      return false;
+// Initialize auth state from storage
+const initializeAuthState = (): AuthState => {
+  try {
+    const storedState = localStorage.getItem(AUTH_STATE_KEY);
+    if (storedState) {
+      const parsedState = JSON.parse(storedState) as AuthState;
+      return parsedState;
+    }
+  } catch (error) {
+    console.error('Failed to parse stored auth state:', error);
+  }
+  return { isAuthenticated: false, user: null };
+};
+
+// State
+let authState: AuthState = initializeAuthState();
+
+// Persist auth state
+const persistAuthState = (state: AuthState): void => {
+  try {
+    localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to persist auth state:', error);
   }
 };
 
-export const hasPermission = (permission: Permission): boolean => {
-  const user = authState.user;
-  if (!user) return false;
-  
-  const roleKey = user.role.toUpperCase() as Uppercase<UserRole>;
-  const rolePermissions = PERMISSIONS[roleKey];
-  
-  return rolePermissions.includes(permission);
-};
+// Get current auth state
+export function getAuthState(): AuthState {
+  return authState;
+}
+
+// Get current user
+export function getCurrentUser(): User | null {
+  return authState.user;
+}
+
+// Authentication functions
+export function isAuthenticated(): boolean {
+  return authState.isAuthenticated && !!authState.user;
+}
+
+// Role and permission checks
+export function hasRole(role: keyof typeof PERMISSIONS): boolean {
+  return authState.user?.role === role;
+}
+
+export function hasPermission(requiredPermission: Permission): boolean {
+  if (!authState.user) return false;
+  const userPermissions = PERMISSIONS[authState.user.role];
+  // Type check to ensure the permission is valid
+  if (typeof requiredPermission === 'string' && 
+      (requiredPermission === 'create' || requiredPermission === 'read')) {
+    return userPermissions.includes(requiredPermission);
+  }
+  return false;
+}
 
 // Token management
 export const getStoredAccessToken = (): string | null => {
@@ -99,68 +131,117 @@ export const removeStoredAccessToken = (): void => {
 };
 
 // Authentication operations
-export const login = async (email: string): Promise<AuthState> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-  
-  if (!user) {
-    throw new Error('Invalid credentials');
+export async function login({ email, password }: LoginCredentials): Promise<void> {
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Mock authentication
+    const user = MOCK_USERS[email];
+    if (!user || user.password !== password) {
+      throw new AuthError('Invalid email or password');
+    }
+
+    // Create mock token
+    const token = btoa(`${email}:${Date.now()}`);
+    setStoredAccessToken(token);
+
+    // Update auth state
+    const newState = {
+      isAuthenticated: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        avatar: user.avatar,
+      },
+    };
+
+    authState = newState;
+    persistAuthState(newState);
+
+    toast.success('Successfully logged in');
+  } catch (error) {
+    if (error instanceof AuthError) {
+      toast.error(error.message);
+    } else {
+      toast.error('An unexpected error occurred');
+      console.error('Login error:', error);
+    }
+    throw error;
   }
+}
 
-  const token = 'mock-jwt-token';
-  authState = {
-    user,
-    token,
-  };
-
-  setStoredAccessToken(token);
-  toast.success(`Welcome, ${user.name}!`);
-  
-  return authState;
-};
-
-export const logout = (): void => {
-  const userName = authState.user?.name ?? "User";
-  
-  authState = {
-    user: null,
-    token: null,
-  };
-  
-  removeStoredAccessToken();
-  toast.info(`${userName} has been logged out`);
-};
+export function logout(): void {
+  try {
+    removeStoredAccessToken();
+    const newState = { isAuthenticated: false, user: null };
+    authState = newState;
+    persistAuthState(newState);
+    toast.success('Successfully logged out');
+  } catch (error) {
+    console.error('Logout error:', error);
+    toast.error('Failed to log out properly');
+  }
+}
 
 // Token refresh
 export const refreshAccessToken = async (): Promise<void> => {
   try {
     const currentToken = getStoredAccessToken();
     if (!currentToken) {
-      throw new Error('No refresh token available');
+      throw new AuthError('No refresh token available');
     }
 
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${currentToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to refresh token');
+    // In a real app, this would be an API call
+    // For now, we'll just check if the token is valid
+    const [email] = atob(currentToken).split(':');
+    const user = MOCK_USERS[email];
+    if (!user) {
+      throw new AuthError('Invalid token');
     }
 
-    const data = await response.json();
-    setStoredAccessToken(data.token);
+    // Create new token
+    const newToken = btoa(`${email}:${Date.now()}`);
+    setStoredAccessToken(newToken);
+
+    // Update auth state if needed
+    if (!authState.isAuthenticated || !authState.user) {
+      const newState = {
+        isAuthenticated: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          avatar: user.avatar,
+        },
+      };
+      authState = newState;
+      persistAuthState(newState);
+    }
   } catch (error) {
+    if (error instanceof AuthError) {
+      toast.error(error.message);
+    } else {
+      toast.error('Failed to refresh authentication');
+      console.error('Token refresh error:', error);
+    }
     removeStoredAccessToken();
+    const newState = { isAuthenticated: false, user: null };
+    authState = newState;
+    persistAuthState(newState);
     throw error;
   }
 };
 
 // Testing/Demo utilities
-export const getAvailableUsers = (): User[] => {
-  return [...mockUsers];
-};
+export function getAvailableUsers(): Array<Omit<User, 'avatar'>> {
+  return Object.values(MOCK_USERS).map(({ id, email, name, role }) => ({
+    id,
+    email,
+    name,
+    role,
+  }));
+}
