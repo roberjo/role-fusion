@@ -1,0 +1,56 @@
+name: Security & Dependencies
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Run daily
+  push:
+    branches: [ main ]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+
+jobs:
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: npm audit
+      
+    - name: Check licenses
+      uses: actions/dependency-review-action@v3
+    
+  dependabot:
+    name: Dependabot
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dependabot
+      uses: github/dependabot-action@v1
+      with:
+        directory: "/"
+        package-ecosystem: "npm"
+        schedule-interval: "daily"
+        target-branch: "main"
+        labels: "dependencies" 
