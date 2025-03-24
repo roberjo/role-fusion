@@ -6,6 +6,7 @@ import { resolve } from 'path';
 import fs from 'fs/promises';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { readFileSync, writeFileSync } from 'fs';
+import type { ProxyOptions } from 'vite';
 
 // Function to update README with coverage stats
 function processCoverageResults() {
@@ -39,14 +40,35 @@ function processCoverageResults() {
   }
 }
 
+// Security configuration
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Define proxy configuration type
+const proxyConfig: Record<string, ProxyOptions> = IS_PRODUCTION ? {} : {
+  '/api': {
+    target: process.env.API_URL || 'http://localhost:3000',
+    changeOrigin: true,
+    secure: IS_PRODUCTION,
+    ws: true,
+  },
+};
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    cors: {
+      origin: ALLOWED_ORIGINS,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    },
     headers: {
       'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
+      'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
       'Content-Security-Policy': `
@@ -58,13 +80,12 @@ export default defineConfig(({ mode }) => ({
         connect-src 'self' ${process.env.VITE_API_URL || ''};
       `.replace(/\s+/g, ' ').trim(),
     },
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_URL,
-        changeOrigin: true,
-        secure: process.env.NODE_ENV === 'production',
-      },
+    hmr: {
+      host: 'localhost',
+      protocol: 'ws',
+      clientPort: 5173,
     },
+    proxy: proxyConfig,
   },
   plugins: [
     react(),
@@ -78,7 +99,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    sourcemap: true,
+    sourcemap: IS_PRODUCTION ? false : 'inline',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -89,8 +110,18 @@ export default defineConfig(({ mode }) => ({
             '@tanstack/react-query',
           ],
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+    minify: IS_PRODUCTION ? 'terser' : false,
+    terserOptions: IS_PRODUCTION ? {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    } : undefined,
   },
   test: {
     globals: true,
@@ -110,3 +141,4 @@ export default defineConfig(({ mode }) => ({
     onFinished: processCoverageResults,
   },
 }));
+
