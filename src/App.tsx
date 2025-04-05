@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { routes } from '@/routes/config';
 import { API_CONFIG } from '@/lib/constants';
 
@@ -27,32 +27,13 @@ const PageLoader = () => (
   </div>
 );
 
-// Protected route wrapper component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 const AppRoutes = () => (
   <Routes>
-    {/* Public route */}
-    <Route path="/login" element={routes.find(r => r.path === '/login')?.element} />
-    
-    {/* Protected routes */}
-    {routes.filter(route => route.path !== '/login').map((route) => (
+    {routes.map((route) => (
       <Route
         key={route.path}
         path={route.path}
-        element={
-          <ProtectedRoute>
-            {route.element}
-          </ProtectedRoute>
-        }
+        element={route.element}
       />
     ))}
   </Routes>

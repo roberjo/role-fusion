@@ -1,39 +1,56 @@
+import { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
-import { Dashboard } from '@/pages/dashboard/Dashboard';
-import { Login } from '@/pages/Login';
-import { NotFound } from '@/pages/NotFound';
-import { OrdersPage } from '@/pages/OrdersPage';
-import { SettingsPage } from '@/pages/SettingsPage';
-import { WorkflowsPage } from '@/pages/WorkflowsPage';
-import { ReactNode } from 'react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
-interface AppRouteObject extends RouteObject {
-  element: ReactNode;
-}
+// Lazy load components with default export
+const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard').then(module => ({ default: module.Dashboard })));
+const Login = lazy(() => import('@/pages/Login').then(module => ({ default: module.Login })));
+const NotFound = lazy(() => import('@/pages/NotFound').then(module => ({ default: module.NotFound })));
+const OrdersPage = lazy(() => import('@/pages/OrdersPage').then(module => ({ default: module.OrdersPage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(module => ({ default: module.SettingsPage })));
+const WorkflowsPage = lazy(() => import('@/pages/WorkflowsPage').then(module => ({ default: module.WorkflowsPage })));
 
-export const routes: AppRouteObject[] = [
-  {
-    path: '/',
-    element: <Dashboard />,
-  },
+// Wrap lazy-loaded components with Suspense
+const lazyLoad = (Component: React.ComponentType) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    <Component />
+  </Suspense>
+);
+
+// Public routes
+const publicRoutes: RouteObject[] = [
   {
     path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/orders',
-    element: <OrdersPage />,
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-  },
-  {
-    path: '/workflows',
-    element: <WorkflowsPage />,
+    element: lazyLoad(Login),
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: lazyLoad(NotFound),
   },
+];
+
+// Protected routes
+const protectedRoutes: RouteObject[] = [
+  {
+    path: '/',
+    element: <ProtectedRoute>{lazyLoad(Dashboard)}</ProtectedRoute>,
+  },
+  {
+    path: '/orders',
+    element: <ProtectedRoute>{lazyLoad(OrdersPage)}</ProtectedRoute>,
+  },
+  {
+    path: '/settings',
+    element: <ProtectedRoute>{lazyLoad(SettingsPage)}</ProtectedRoute>,
+  },
+  {
+    path: '/workflows',
+    element: <ProtectedRoute>{lazyLoad(WorkflowsPage)}</ProtectedRoute>,
+  },
+];
+
+export const routes: RouteObject[] = [
+  ...publicRoutes,
+  ...protectedRoutes,
 ]; 
