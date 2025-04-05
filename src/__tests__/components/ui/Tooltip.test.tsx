@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent, waitFor, within } from '../../../test/test-utils';
+import { render, screen, fireEvent, waitFor } from '../../../test/test-utils';
 import {
   Tooltip,
   TooltipTrigger,

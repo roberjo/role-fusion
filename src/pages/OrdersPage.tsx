@@ -6,7 +6,7 @@ import { hasPermission } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, PlusCircle, Filter, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/data-grid/DataTable";
 import {
@@ -69,10 +69,10 @@ export function OrdersPage() {
     setCurrentPage(page);
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on new search
-  };
+  // const handleSearch = (query: string) => {
+  //   setSearchQuery(query);
+  //   setCurrentPage(1); // Reset to first page on new search
+  // };
 
   const handleSort = (columnId: string, direction: 'asc' | 'desc') => {
     setSortBy(columnId);

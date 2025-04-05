@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { DataTableHeader } from "./table/DataTableHeader";
 import { DataTableBody } from "./table/DataTableBody";
 import { DataTableColumnHeader } from "./table/DataTableColumnHeader";

@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
-import * as jestDomMatchers from '@testing-library/jest-dom/matchers';
-import { getAuthState } from "./auth";
+import { getStoredAccessToken } from "./auth";
 
 const API_URL = "https://api.example.com/v1"; // Mock API URL
 
@@ -9,12 +8,12 @@ export async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const { token } = getAuthState();
+  const authToken = getStoredAccessToken();
   
   const headers = new Headers(options.headers);
   
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
   }
   
   headers.set("Content-Type", "application/json");

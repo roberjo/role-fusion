@@ -1,8 +1,8 @@
 import { QueryClient, DefaultOptions } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { API_CONFIG } from './constants';
+//import { API_CONFIG } from './constants';
 
-const env = process.env.NODE_ENV;
+//const env = process.env.NODE_ENV;
 
 const handleError = (error: unknown) => {
   const message = error instanceof Error ? error.message : 'An error occurred';
@@ -11,9 +11,9 @@ const handleError = (error: unknown) => {
 
 const defaultOptions: DefaultOptions = {
   queries: {
-    staleTime: API_CONFIG.STALE_TIME[env as keyof typeof API_CONFIG.STALE_TIME],
-    retry: API_CONFIG.RETRY_COUNT[env as keyof typeof API_CONFIG.RETRY_COUNT],
-    refetchOnWindowFocus: env === 'production',
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    refetchOnWindowFocus: false,
   },
   mutations: {
     onError: handleError,
@@ -23,12 +23,7 @@ const defaultOptions: DefaultOptions = {
 export const queryClient = new QueryClient({ defaultOptions });
 
 // Global error handler
-queryClient.setDefaultOptions({
-  queries: {
-    onError: handleError,
-  },
-});
-
+// Remove the redundant setDefaultOptions call since we already have defaultOptions
 export function getQueryData<T>(key: string[]): T | undefined {
   try {
     return queryClient.getQueryData<T>(key);

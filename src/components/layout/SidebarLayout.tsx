@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+//import { useToast } from "@/hooks/use-toast";
 import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
 import { AppSidebar } from "./AppSidebar";
 import { PageTitle } from "./PageTitle";
@@ -15,7 +15,7 @@ interface SidebarLayoutProps {
 
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const location = useLocation();
-  const { toast } = useToast();
+  //const { toast } = useToast();
   const navigate = useNavigate();
   const [pageTransition, setPageTransition] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);

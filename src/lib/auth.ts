@@ -12,7 +12,7 @@ export interface User {
   email: string;
   name: string;
   role: keyof typeof PERMISSIONS;
-  avatar?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthState {
@@ -40,7 +40,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'admin123', // In a real app, this would be hashed
     name: 'Admin User',
     role: 'ADMIN',
-    avatar: 'https://avatar.example.com/admin',
+    avatarUrl: 'https://avatar.example.com/admin',
   },
   'manager@example.com': {
     id: 'user-2',
@@ -48,7 +48,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'manager123',
     name: 'Manager User',
     role: 'MANAGER',
-    avatar: 'https://avatar.example.com/manager',
+    avatarUrl: 'https://avatar.example.com/manager',
   },
   'user@example.com': {
     id: 'user-3',
@@ -56,7 +56,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'user123',
     name: 'Regular User',
     role: 'USER',
-    avatar: 'https://avatar.example.com/user',
+    avatarUrl: 'https://avatar.example.com/user',
   },
 };
 
@@ -154,7 +154,7 @@ export async function login({ email, password }: LoginCredentials): Promise<void
         email: user.email,
         name: user.name,
         role: user.role,
-        avatar: user.avatar,
+        avatarUrl: user.avatarUrl,
       },
     };
 
@@ -215,7 +215,7 @@ export const refreshAccessToken = async (): Promise<void> => {
           email: user.email,
           name: user.name,
           role: user.role,
-          avatar: user.avatar,
+          avatarUrl: user.avatarUrl,
         },
       };
       authState = newState;
@@ -237,11 +237,12 @@ export const refreshAccessToken = async (): Promise<void> => {
 };
 
 // Testing/Demo utilities
-export function getAvailableUsers(): Array<Omit<User, 'avatar'>> {
-  return Object.values(MOCK_USERS).map(({ id, email, name, role }) => ({
+export function getAvailableUsers(): Array<User> {
+  return Object.values(MOCK_USERS).map(({ id, email, name, role, avatarUrl }) => ({
     id,
     email,
     name,
     role,
+    avatarUrl,
   }));
 }

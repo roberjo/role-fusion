@@ -1,9 +1,9 @@
 
-import React from 'react';
+//import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, LogOut, ChevronDown } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
+//import { toast } from "sonner";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User as UserType } from "@/lib/auth";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
+import { toast } from 'sonner';
 
 interface UserMenuProps {
   user: UserType | null;
@@ -48,7 +49,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
               <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
             </div>
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+              <AvatarImage src={user.avatarUrl || "/placeholder.svg"} alt={user.name} />
               <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />

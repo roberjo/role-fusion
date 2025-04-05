@@ -1,5 +1,4 @@
-
-import React from 'react';
+// import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, Grid, Workflow, Users, Settings, FileText, LogOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -23,7 +22,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ currentPath, onLogout }: AppSidebarProps) {
-  const isAdmin = hasRole('admin');
+  const isAdmin = hasRole('ADMIN');
   
   // Base menu items that all users can see
   const menuItems = [

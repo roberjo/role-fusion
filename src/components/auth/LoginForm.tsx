@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +39,7 @@ export function LoginForm() {
     try {
       setIsLoading(true);
       
-      await login(email, password);
+      await login({ email, password });
       navigate("/");
     } catch (error) {
       toast({

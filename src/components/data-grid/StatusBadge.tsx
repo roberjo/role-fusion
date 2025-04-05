@@ -9,7 +9,7 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   const getStatusColor = (status: string) => {
-    return STATUS_COLORS[status.toLowerCase() as StatusType] || STATUS_COLORS.inactive;
+    return STATUS_COLORS[status.toLowerCase() as StatusType] || STATUS_COLORS.INACTIVE;
   };
   
   return (
