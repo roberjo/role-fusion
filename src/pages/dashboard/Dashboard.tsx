@@ -5,7 +5,7 @@ import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { getAvailableUsers, User } from "@/lib/auth";
-import { fetchWorkflows, mockWorkflows, mockTableData } from "@/lib/api";
+import { mockWorkflows, mockTableData } from "@/lib/api";
 import { WorkflowItem } from "@/components/workflow/WorkflowCard";
 import { StatsCards } from "./components/StatsCards";
 import { PendingWorkflows } from "./components/PendingWorkflows";
@@ -18,7 +18,7 @@ export function Dashboard() {
     activeProcesses: 0,
     completedProcesses: 0,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,6 +30,7 @@ export function Dashboard() {
         const users = getAvailableUsers();
         const workflowsData = mockWorkflows.data;
         const tableData = mockTableData.data;
+        console.log(tableData); // Log it or use it in your UI
         
         setDashboardData(users, workflowsData);
       } catch (error) {
