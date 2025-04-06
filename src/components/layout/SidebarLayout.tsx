@@ -1,13 +1,14 @@
-
 import { ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 //import { useToast } from "@/hooks/use-toast";
-import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
+import { logout, getEffectiveUser } from "@/lib/auth";
 import { AppSidebar } from "./AppSidebar";
 import { PageTitle } from "./PageTitle";
 import { UserMenu } from "./UserMenu";
+//import { useAuth } from "@/contexts/AuthContext";
+import { ImpersonationBanner } from "@/components/auth/ImpersonationBanner";
 
 interface SidebarLayoutProps {
   children: ReactNode;
@@ -18,11 +19,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   //const { toast } = useToast();
   const navigate = useNavigate();
   const [pageTransition, setPageTransition] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
-
-  useEffect(() => {
-    setCurrentUser(getCurrentUser());
-  }, []);
+  //const { authState } = useAuth();
+  const effectiveUser = getEffectiveUser();
 
   useEffect(() => {
     setPageTransition(true);
@@ -47,11 +45,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             <div className="flex-1">
               <PageTitle pathname={location.pathname} />
             </div>
-            <UserMenu user={currentUser} onLogout={handleLogout} />
+            <div className="flex items-center gap-2">
+              <UserMenu user={effectiveUser} onLogout={handleLogout} />
+            </div>
           </header>
+          
+          <ImpersonationBanner />
+          
           <main className={cn(
-            "flex-1 p-6",
-            pageTransition ? "animate-fade-in" : ""
+            "flex-1 p-6 transition-opacity duration-300",
+            pageTransition ? "opacity-0" : "opacity-100"
           )}>
             {children}
           </main>

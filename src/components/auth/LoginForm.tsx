@@ -15,10 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Map of user IDs to their passwords
+const USER_PASSWORDS: Record<string, string> = {
+  'user-1': 'admin123',
+  'user-2': 'manager123',
+  'user-3': 'user123',
+};
+
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("password"); // Default password for demo
+  const [password, setPassword] = useState(""); // Empty default password
   const [selectedDemoUser, setSelectedDemoUser] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -57,6 +64,8 @@ export function LoginForm() {
     if (selectedUser) {
       setEmail(selectedUser.email);
       setSelectedDemoUser(value);
+      // Set the correct password for the selected user
+      setPassword(USER_PASSWORDS[value] || '');
     }
   };
 
@@ -134,7 +143,7 @@ export function LoginForm() {
       </Button>
       
       <div className="text-center text-sm mt-6">
-        <span className="text-muted-foreground">Any password works for the demo users.</span>
+        <span className="text-muted-foreground">Demo users have specific passwords.</span>
       </div>
       
       <div className="relative">

@@ -1,7 +1,6 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/data-grid/DataTable";
 import { cn } from "@/lib/utils";
 
@@ -31,38 +30,68 @@ export function RecentActivities() {
   ];
   
   return (
-    <Card className={cn("glass-panel animate-fade-in md:col-span-3")} style={{ animationDelay: '500ms' }}>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Recent Activity</CardTitle>
+    <Card className={cn("glass-panel animate-fade-in h-full flex flex-col")} style={{ animationDelay: '400ms' }}>
+      <CardHeader className="pb-2 flex-none">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-xl">Recent Activity</CardTitle>
+            <CardDescription>Latest updates from your system</CardDescription>
+          </div>
           <Button variant="ghost" size="sm" className="gap-1">
             View all
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {recentActivities.map((activity, i) => (
-            <div 
-              key={activity.id} 
-              className={cn(
-                "flex items-start p-3 rounded-lg",
-                i % 2 === 0 ? "bg-muted/40" : ""
-              )}
-            >
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{activity.title}</p>
-                  <StatusBadge status={activity.status} />
-                </div>
-                <p className="text-sm text-muted-foreground">{activity.description}</p>
-                <p className="text-xs text-muted-foreground">{activity.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+      <CardContent className="flex-1 flex flex-col space-y-4 overflow-auto">
+        {recentActivities.map((activity, i) => (
+          <ActivityCard 
+            key={activity.id} 
+            activity={activity} 
+            index={i}
+          />
+        ))}
       </CardContent>
+      <CardFooter className="flex-none flex justify-end gap-2 pt-4 border-t border-border/50">
+        <Button variant="outline" size="sm">View Details</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+interface ActivityCardProps {
+  activity: {
+    id: string;
+    title: string;
+    description: string;
+    time: string;
+    status: string;
+  };
+  index: number;
+}
+
+function ActivityCard({ activity, index }: ActivityCardProps) {
+  return (
+    <Card className={cn(
+      "glass-panel transition-all duration-350 hover:shadow-elevated",
+      index % 2 === 0 ? "bg-muted/40" : ""
+    )}>
+      <CardHeader className="pb-2 flex-none">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-base">{activity.title}</CardTitle>
+            <CardDescription className="mt-1 flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {activity.time}
+            </CardDescription>
+          </div>
+          <StatusBadge status={activity.status} />
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <p className="text-sm text-muted-foreground">{activity.description}</p>
+      </CardContent>
+      <CardFooter className="flex-none flex justify-end gap-2 pt-4 border-t border-border/50">footer</CardFooter>
     </Card>
   );
 }

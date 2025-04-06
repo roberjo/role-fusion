@@ -11,7 +11,7 @@ import { StatsCards } from "./components/StatsCards";
 import { PendingWorkflows } from "./components/PendingWorkflows";
 import { RecentActivities } from "./components/RecentActivities";
 
-export function Dashboard() {
+export default function Dashboard() {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -102,7 +102,7 @@ export function Dashboard() {
 
         <StatsCards stats={stats} />
 
-        <div className="grid gap-4 md:grid-cols-7">
+        <div className="grid gap-4 md:grid-cols-2">
           <PendingWorkflows 
             workflows={workflows} 
             onApprove={handleWorkflowApprove} 

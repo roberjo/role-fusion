@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { getStoredAccessToken } from "./auth";
 
 const API_URL = "https://api.example.com/v1"; // Mock API URL

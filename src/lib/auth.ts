@@ -12,12 +12,19 @@ export interface User {
   email: string;
   name: string;
   role: keyof typeof PERMISSIONS;
-  avatarUrl?: string;
+  avatar?: string;
+}
+
+export interface ImpersonationState {
+  isImpersonating: boolean;
+  originalUser: User | null;
+  impersonatedUser: User | null;
 }
 
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
+  impersonation: ImpersonationState;
 }
 
 export interface LoginCredentials {
@@ -40,7 +47,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'admin123', // In a real app, this would be hashed
     name: 'Admin User',
     role: 'ADMIN',
-    avatarUrl: 'https://avatar.example.com/admin',
+    avatar: 'https://avatar.example.com/admin',
   },
   'manager@example.com': {
     id: 'user-2',
@@ -48,7 +55,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'manager123',
     name: 'Manager User',
     role: 'MANAGER',
-    avatarUrl: 'https://avatar.example.com/manager',
+    avatar: 'https://avatar.example.com/manager',
   },
   'user@example.com': {
     id: 'user-3',
@@ -56,7 +63,7 @@ const MOCK_USERS: Record<string, User & { password: string }> = {
     password: 'user123',
     name: 'Regular User',
     role: 'USER',
-    avatarUrl: 'https://avatar.example.com/user',
+    avatar: 'https://avatar.example.com/user',
   },
 };
 
@@ -71,7 +78,15 @@ const initializeAuthState = (): AuthState => {
   } catch (error) {
     console.error('Failed to parse stored auth state:', error);
   }
-  return { isAuthenticated: false, user: null };
+  return { 
+    isAuthenticated: false, 
+    user: null,
+    impersonation: {
+      isImpersonating: false,
+      originalUser: null,
+      impersonatedUser: null
+    }
+  };
 };
 
 // State
@@ -154,8 +169,13 @@ export async function login({ email, password }: LoginCredentials): Promise<void
         email: user.email,
         name: user.name,
         role: user.role,
-        avatarUrl: user.avatarUrl,
+        avatar: user.avatar,
       },
+      impersonation: {
+        isImpersonating: false,
+        originalUser: null,
+        impersonatedUser: null
+      }
     };
 
     authState = newState;
@@ -176,7 +196,15 @@ export async function login({ email, password }: LoginCredentials): Promise<void
 export function logout(): void {
   try {
     removeStoredAccessToken();
-    const newState = { isAuthenticated: false, user: null };
+    const newState = { 
+      isAuthenticated: false, 
+      user: null,
+      impersonation: {
+        isImpersonating: false,
+        originalUser: null,
+        impersonatedUser: null
+      }
+    };
     authState = newState;
     persistAuthState(newState);
     toast.success('Successfully logged out');
@@ -215,8 +243,13 @@ export const refreshAccessToken = async (): Promise<void> => {
           email: user.email,
           name: user.name,
           role: user.role,
-          avatarUrl: user.avatarUrl,
+          avatar: user.avatar,
         },
+        impersonation: {
+          isImpersonating: false,
+          originalUser: null,
+          impersonatedUser: null
+        }
       };
       authState = newState;
       persistAuthState(newState);
@@ -229,7 +262,15 @@ export const refreshAccessToken = async (): Promise<void> => {
       console.error('Token refresh error:', error);
     }
     removeStoredAccessToken();
-    const newState = { isAuthenticated: false, user: null };
+    const newState = { 
+      isAuthenticated: false, 
+      user: null,
+      impersonation: {
+        isImpersonating: false,
+        originalUser: null,
+        impersonatedUser: null
+      }
+    };
     authState = newState;
     persistAuthState(newState);
     throw error;
@@ -238,11 +279,58 @@ export const refreshAccessToken = async (): Promise<void> => {
 
 // Testing/Demo utilities
 export function getAvailableUsers(): Array<User> {
-  return Object.values(MOCK_USERS).map(({ id, email, name, role, avatarUrl }) => ({
+  return Object.values(MOCK_USERS).map(({ id, email, name, role, avatar }) => ({
     id,
     email,
     name,
     role,
-    avatarUrl,
+    avatar,
   }));
+}
+
+// Impersonation functions
+export function startImpersonation(userToImpersonate: User): void {
+  if (!authState.user || authState.user.role !== 'ADMIN') {
+    throw new AuthError('Only administrators can impersonate users');
+  }
+
+  const newState = {
+    ...authState,
+    impersonation: {
+      isImpersonating: true,
+      originalUser: authState.user,
+      impersonatedUser: userToImpersonate
+    }
+  };
+
+  authState = newState;
+  persistAuthState(newState);
+  toast.success(`Now impersonating ${userToImpersonate.name}`);
+}
+
+export function stopImpersonation(): void {
+  if (!authState.impersonation.isImpersonating) {
+    return;
+  }
+
+  const newState = {
+    ...authState,
+    impersonation: {
+      isImpersonating: false,
+      originalUser: null,
+      impersonatedUser: null
+    }
+  };
+
+  authState = newState;
+  persistAuthState(newState);
+  toast.success('Stopped impersonating user');
+}
+
+// Get current effective user (either impersonated or real)
+export function getEffectiveUser(): User | null {
+  if (authState.impersonation.isImpersonating && authState.impersonation.impersonatedUser) {
+    return authState.impersonation.impersonatedUser;
+  }
+  return authState.user;
 }

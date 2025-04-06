@@ -69,7 +69,7 @@ const UsersPage = () => {
           <Card key={user.id}>
             <CardHeader className="flex flex-row items-center gap-4 pb-2">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={user.avatarUrl || "/placeholder.svg"} alt={user.name} />
+                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                 <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="space-y-1">

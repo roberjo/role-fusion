@@ -4,12 +4,15 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Lazy load components with default export
-const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard').then(module => ({ default: module.Dashboard })));
+const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const Login = lazy(() => import('@/pages/Login').then(module => ({ default: module.Login })));
 const NotFound = lazy(() => import('@/pages/NotFound').then(module => ({ default: module.NotFound })));
 const OrdersPage = lazy(() => import('@/pages/OrdersPage').then(module => ({ default: module.OrdersPage })));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(module => ({ default: module.SettingsPage })));
 const WorkflowsPage = lazy(() => import('@/pages/WorkflowsPage').then(module => ({ default: module.WorkflowsPage })));
+const DataGridPage = lazy(() => import('@/pages/DataGridPage'));
+const UsersPage = lazy(() => import('@/pages/UsersPage'));
+const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
 
 // Wrap lazy-loaded components with Suspense
 const lazyLoad = (Component: React.ComponentType) => (
@@ -37,6 +40,10 @@ const protectedRoutes: RouteObject[] = [
     element: <ProtectedRoute>{lazyLoad(Dashboard)}</ProtectedRoute>,
   },
   {
+    path: '/data-grid',
+    element: <ProtectedRoute>{lazyLoad(DataGridPage)}</ProtectedRoute>,
+  },
+  {
     path: '/orders',
     element: <ProtectedRoute>{lazyLoad(OrdersPage)}</ProtectedRoute>,
   },
@@ -47,6 +54,14 @@ const protectedRoutes: RouteObject[] = [
   {
     path: '/workflows',
     element: <ProtectedRoute>{lazyLoad(WorkflowsPage)}</ProtectedRoute>,
+  },
+  {
+    path: '/users',
+    element: <ProtectedRoute>{lazyLoad(UsersPage)}</ProtectedRoute>,
+  },
+  {
+    path: '/reports',
+    element: <ProtectedRoute>{lazyLoad(ReportsPage)}</ProtectedRoute>,
   },
 ];
 

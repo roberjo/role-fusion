@@ -58,7 +58,7 @@ const proxyConfig: Record<string, ProxyOptions> = IS_PRODUCTION ? {} : {
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 5173,
     cors: {
       origin: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -74,11 +74,16 @@ export default defineConfig(({ mode }) => ({
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
       'Content-Security-Policy': `
         default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co;
+        script-src-elem 'self' 'unsafe-inline' https://cdn.gpteng.co;
         style-src 'self' 'unsafe-inline';
         img-src 'self' data: https:;
         font-src 'self' data:;
-        connect-src 'self' ${process.env.VITE_API_URL || ''};
+        connect-src 'self' ${process.env.VITE_API_URL || ''} ws://localhost:5173 http://localhost:5173 https://cdn.gpteng.co;
+        frame-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
       `.replace(/\s+/g, ' ').trim(),
     },
     hmr: {
