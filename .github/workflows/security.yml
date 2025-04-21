@@ -37,7 +37,7 @@ jobs:
       run: npm audit
       
     - name: Check licenses
-      uses: actions/dependency-review-action@v3
+      uses: actions/dependency-review-action@v4
     
   dependabot:
     name: Dependabot
